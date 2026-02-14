@@ -676,9 +676,281 @@ details .details-content{padding:24px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border-medium);border-radius:4px}
 ::-webkit-scrollbar-thumb:hover{background:var(--border-strong)}
+
+/* ===== PDF DOWNLOAD BUTTON ===== */
+.pdf-download-btn{
+  background:var(--bg-overlay);border:1px solid var(--border-medium);
+  border-radius:12px;padding:8px 16px;cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--text-300);
+  display:flex;align-items:center;gap:8px;
+  transition:all 0.25s ease;font-family:var(--font);
+}
+.pdf-download-btn:hover{border-color:var(--blue);color:var(--text-100);background:var(--bg-surface)}
+.pdf-download-btn svg{width:16px;height:16px}
+.header-actions{display:flex;align-items:center;gap:8px}
+
+/* ===== PDF MODAL ===== */
+.pdf-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;
+}
+.pdf-modal-overlay.show{display:flex}
+.pdf-modal{
+  background:var(--bg-raised);border:1px solid var(--border-medium);
+  border-radius:24px;padding:36px;width:90%;max-width:420px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.4);
+  animation:slide-up 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.pdf-modal h3{font-size:20px;font-weight:800;margin-bottom:8px;color:var(--text-100);letter-spacing:-0.02em}
+.pdf-modal>p{font-size:14px;color:var(--text-400);margin-bottom:24px;line-height:1.5}
+.pdf-theme-options{display:flex;gap:12px;margin-bottom:24px}
+.pdf-theme-btn{
+  flex:1;padding:20px 16px;border-radius:16px;cursor:pointer;
+  border:2px solid var(--border-medium);background:var(--bg-overlay);
+  text-align:center;transition:all 0.25s ease;font-family:var(--font);
+}
+.pdf-theme-btn:hover{border-color:var(--blue);transform:translateY(-2px)}
+.pdf-theme-btn.selected{border-color:var(--blue);background:rgba(59,130,246,0.1);box-shadow:0 0 20px rgba(59,130,246,0.15)}
+.pdf-theme-btn .theme-preview{
+  width:100%;height:48px;border-radius:8px;margin-bottom:12px;
+  border:1px solid var(--border-subtle);
+}
+.pdf-theme-btn .theme-preview.light-prev{background:linear-gradient(135deg,#FAFBFE,#E8ECF4)}
+.pdf-theme-btn .theme-preview.dark-prev{background:linear-gradient(135deg,#0A0A0F,#1A1A25)}
+.pdf-theme-btn .theme-label{font-size:14px;font-weight:700;color:var(--text-200)}
+.pdf-modal-actions{display:flex;gap:10px}
+.pdf-modal-cancel{
+  flex:1;padding:14px;border-radius:12px;cursor:pointer;
+  background:var(--bg-overlay);border:1px solid var(--border-medium);
+  font-size:14px;font-weight:600;color:var(--text-300);
+  font-family:var(--font);transition:all 0.2s;
+}
+.pdf-modal-cancel:hover{background:var(--bg-surface);color:var(--text-100)}
+.pdf-modal-download{
+  flex:1;padding:14px;border-radius:12px;cursor:pointer;
+  background:linear-gradient(135deg,var(--blue),var(--purple));border:none;
+  font-size:14px;font-weight:700;color:#fff;
+  font-family:var(--font);transition:all 0.2s;
+  box-shadow:0 4px 16px rgba(59,130,246,0.3);
+}
+.pdf-modal-download:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(59,130,246,0.4)}
+
+/* ===== PRINTABLE DOCUMENT ===== */
+.printable-document{
+  position:absolute;left:-9999px;top:0;
+  width:210mm;overflow:hidden;
+  background:white;color:#171717;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  line-height:1.5;
+}
+.printable-document.dark{background:#0a0a0a;color:#f5f5f5}
+.printable-document .pdf-page{padding:18mm 16mm;min-height:297mm;position:relative}
+.printable-document .pdf-page-break{break-before:page;page-break-before:always}
+.printable-document .pdf-section-num{
+  display:inline-block;font-size:10px;font-weight:700;
+  color:#3B82F6;background:rgba(59,130,246,0.08);
+  border:1px solid rgba(59,130,246,0.15);border-radius:4px;
+  padding:2px 8px;margin-bottom:8px;letter-spacing:0.06em;
+}
+.printable-document.dark .pdf-section-num{color:#60A5FA;background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.2)}
+.printable-document .pdf-section-title{
+  font-size:22px;font-weight:800;letter-spacing:-0.02em;
+  margin-bottom:20px;color:#0F172A;
+}
+.printable-document.dark .pdf-section-title{color:#F8FAFC}
+.printable-document p{margin-bottom:12px;font-size:13px;line-height:1.65;color:#374151}
+.printable-document.dark p{color:#D1D5DB}
+.printable-document h3{font-size:16px;font-weight:700;margin:20px 0 10px;color:#0F172A}
+.printable-document.dark h3{color:#F8FAFC}
+.print-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.print-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.print-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.print-card{
+  background:#f9fafb;border:1px solid #e5e5e5;
+  border-radius:12px;padding:14px;
+}
+.print-card-solid{background:white}
+.printable-document.dark .print-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12)}
+.printable-document.dark .print-card-solid{background:rgba(255,255,255,0.03)}
+.printable-document .pdf-code{
+  background:#1E1E2E;color:#E2E8F0;border-radius:10px;
+  padding:14px 16px;font-family:'SF Mono','Fira Code','Consolas',monospace;
+  font-size:10.5px;line-height:1.7;margin:12px 0;
+  white-space:pre-wrap;word-break:break-all;
+}
+.printable-document .pdf-callout{
+  border-left:3px solid #3B82F6;padding:12px 16px;
+  margin:12px 0;border-radius:0 8px 8px 0;
+  background:#f0f7ff;
+}
+.printable-document.dark .pdf-callout{background:rgba(59,130,246,0.08);border-left-color:#60A5FA}
+.printable-document .pdf-callout.warning{border-left-color:#F59E0B;background:#fffbeb}
+.printable-document.dark .pdf-callout.warning{background:rgba(245,158,11,0.08)}
+.printable-document .pdf-callout.success{border-left-color:#10B981;background:#ecfdf5}
+.printable-document.dark .pdf-callout.success{background:rgba(16,185,129,0.08)}
+.printable-document .pdf-callout.error{border-left-color:#EF4444;background:#fef2f2}
+.printable-document.dark .pdf-callout.error{background:rgba(239,68,68,0.08)}
+.printable-document .pdf-callout-title{font-weight:700;font-size:13px;margin-bottom:6px;color:#0F172A}
+.printable-document.dark .pdf-callout-title{color:#F8FAFC}
+.printable-document table{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0}
+.printable-document th{
+  background:#f1f5f9;font-weight:700;text-align:left;
+  padding:8px 12px;font-size:10px;text-transform:uppercase;
+  letter-spacing:0.06em;color:#64748B;border-bottom:2px solid #e2e8f0;
+}
+.printable-document.dark th{background:rgba(255,255,255,0.05);color:#94A3B8;border-bottom-color:rgba(255,255,255,0.1)}
+.printable-document td{padding:8px 12px;border-top:1px solid #f1f5f9;color:#374151}
+.printable-document.dark td{border-top-color:rgba(255,255,255,0.06);color:#D1D5DB}
+.printable-document .pdf-timeline-item{
+  padding:6px 0 6px 20px;border-left:2px solid #3B82F6;
+  position:relative;font-size:12px;
+}
+.printable-document.dark .pdf-timeline-item{border-left-color:#60A5FA}
+.printable-document .pdf-timeline-item::before{
+  content:'';position:absolute;left:-5px;top:10px;
+  width:8px;height:8px;border-radius:50%;background:#3B82F6;
+}
+.printable-document.dark .pdf-timeline-item::before{background:#60A5FA}
+.printable-document .pdf-timeline-title{font-weight:700;color:#0F172A;font-size:12px}
+.printable-document.dark .pdf-timeline-title{color:#F8FAFC}
+.printable-document .pdf-timeline-desc{color:#64748B;font-size:11px}
+.printable-document.dark .pdf-timeline-desc{color:#94A3B8}
+.printable-document .pdf-compare-bad{border-left:3px solid #EF4444;padding:10px 14px;background:#fef2f2;border-radius:0 8px 8px 0}
+.printable-document.dark .pdf-compare-bad{background:rgba(239,68,68,0.06)}
+.printable-document .pdf-compare-good{border-left:3px solid #10B981;padding:10px 14px;background:#ecfdf5;border-radius:0 8px 8px 0}
+.printable-document.dark .pdf-compare-good{background:rgba(16,185,129,0.06)}
+.printable-document .pdf-compare-bad h4{color:#EF4444;font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:6px;letter-spacing:0.04em}
+.printable-document .pdf-compare-good h4{color:#10B981;font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:6px;letter-spacing:0.04em}
+.printable-document .pdf-compare-bad li,.printable-document .pdf-compare-good li{font-size:12px;padding:2px 0;list-style:none}
+.printable-document .pdf-numbered{counter-reset:pdfitem;list-style:none;padding:0}
+.printable-document .pdf-numbered li{
+  counter-increment:pdfitem;padding:4px 0 4px 28px;
+  position:relative;font-size:12px;color:#374151;
+}
+.printable-document.dark .pdf-numbered li{color:#D1D5DB}
+.printable-document .pdf-numbered li::before{
+  content:counter(pdfitem);position:absolute;left:0;top:4px;
+  width:20px;height:20px;border-radius:50%;
+  background:linear-gradient(135deg,#3B82F6,#8B5CF6);color:#fff;
+  font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+}
+.printable-document .pdf-checklist{list-style:none;padding:0}
+.printable-document .pdf-checklist li{
+  padding:3px 0 3px 22px;position:relative;font-size:12px;color:#374151;
+}
+.printable-document.dark .pdf-checklist li{color:#D1D5DB}
+.printable-document .pdf-checklist li::before{content:'\2713';position:absolute;left:0;color:#10B981;font-weight:700}
+.printable-document .pdf-error{margin:8px 0;padding:12px 14px;border-radius:10px;background:#f9fafb;border:1px solid #e5e5e5}
+.printable-document.dark .pdf-error{background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.1)}
+.printable-document .pdf-error-name{color:#EF4444;font-weight:700;font-size:13px;margin-bottom:4px}
+.printable-document .pdf-error-problem{font-size:12px;color:#64748B;margin-bottom:6px}
+.printable-document.dark .pdf-error-problem{color:#94A3B8}
+.printable-document .pdf-error-solution{
+  font-size:12px;padding:8px 12px;border-left:2px solid #10B981;
+  background:#ecfdf5;border-radius:0 6px 6px 0;
+}
+.printable-document.dark .pdf-error-solution{background:rgba(16,185,129,0.06)}
+.printable-document .pdf-cover{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;
+  min-height:297mm;padding:40mm 20mm;
+}
+.printable-document .pdf-cover-badge{
+  display:inline-block;font-size:10px;font-weight:700;
+  color:#3B82F6;background:rgba(59,130,246,0.08);
+  border:1px solid rgba(59,130,246,0.15);border-radius:100px;
+  padding:6px 18px;margin-bottom:24px;letter-spacing:0.08em;text-transform:uppercase;
+}
+.printable-document.dark .pdf-cover-badge{color:#60A5FA;background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.2)}
+.printable-document .pdf-cover-title{
+  font-size:36px;font-weight:800;letter-spacing:-0.03em;
+  line-height:1.15;margin-bottom:16px;color:#0F172A;
+}
+.printable-document.dark .pdf-cover-title{color:#F8FAFC}
+.printable-document .pdf-cover-subtitle{
+  font-size:16px;color:#64748B;max-width:400px;line-height:1.6;margin-bottom:40px;
+}
+.printable-document.dark .pdf-cover-subtitle{color:#94A3B8}
+.printable-document .pdf-cover-metrics{display:flex;gap:24px;justify-content:center}
+.printable-document .pdf-metric{text-align:center;padding:16px 24px}
+.printable-document .pdf-metric-value{font-size:36px;font-weight:800;letter-spacing:-0.03em}
+.printable-document .pdf-metric-value.blue{color:#3B82F6}
+.printable-document .pdf-metric-value.green{color:#10B981}
+.printable-document .pdf-metric-value.yellow{color:#F59E0B}
+.printable-document .pdf-metric-label{font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.08em}
+.printable-document.dark .pdf-metric-label{color:#94A3B8}
+.printable-document:not(.dark) .gradient-text{
+  background:none!important;-webkit-background-clip:unset!important;
+  -webkit-text-fill-color:#2563eb!important;color:#2563eb!important;
+}
+.printable-document.dark .gradient-text{
+  background:none!important;-webkit-background-clip:unset!important;
+  -webkit-text-fill-color:#60a5fa!important;color:#60a5fa!important;
+}
+.printable-document .pdf-step{padding:10px 14px}
+.printable-document .pdf-step-num{font-size:22px;font-weight:900;margin-bottom:4px;color:#3B82F6}
+.printable-document.dark .pdf-step-num{color:#60A5FA}
+.printable-document .pdf-step-title{font-weight:700;font-size:13px;margin-bottom:3px;color:#0F172A}
+.printable-document.dark .pdf-step-title{color:#F8FAFC}
+.printable-document .pdf-step-desc{font-size:11px;color:#64748B;line-height:1.5}
+.printable-document.dark .pdf-step-desc{color:#94A3B8}
+.printable-document .pdf-cta{
+  text-align:center;padding:30px;margin:20px 0;
+  background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(139,92,246,0.04));
+  border-radius:16px;border:1px solid #e5e5e5;
+}
+.printable-document.dark .pdf-cta{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(139,92,246,0.06));border-color:rgba(255,255,255,0.1)}
+.printable-document .pdf-cta h3{font-size:20px;font-weight:800;color:#0F172A;margin-bottom:8px}
+.printable-document.dark .pdf-cta h3{color:#F8FAFC}
+.printable-document .pdf-cta p{font-size:13px;color:#64748B;max-width:380px;margin:0 auto}
+.printable-document.dark .pdf-cta p{color:#94A3B8}
+.printable-document .pdf-session{margin:10px 0}
+.printable-document .pdf-session h4{font-size:14px;font-weight:700;margin-bottom:6px;color:#0F172A}
+.printable-document.dark .pdf-session h4{color:#F8FAFC}
+.printable-document .pdf-footer{
+  text-align:center;font-size:10px;color:#94A3B8;
+  padding-top:20px;border-top:1px solid #e5e5e5;margin-top:20px;
+}
+.printable-document.dark .pdf-footer{border-top-color:rgba(255,255,255,0.1)}
+.printable-document .pdf-lifecycle{text-align:center;padding:14px}
+.printable-document .pdf-lifecycle-num{font-size:28px;font-weight:900;color:#3B82F6;margin-bottom:4px}
+.printable-document.dark .pdf-lifecycle-num{color:#60A5FA}
+.printable-document .pdf-lifecycle-title{font-weight:700;font-size:13px;margin-bottom:3px;color:#0F172A}
+.printable-document.dark .pdf-lifecycle-title{color:#F8FAFC}
+.printable-document .pdf-lifecycle-desc{font-size:11px;color:#64748B}
+.printable-document.dark .pdf-lifecycle-desc{color:#94A3B8}
+.printable-document .pdf-process-step{text-align:center;padding:14px}
+.printable-document .pdf-process-num{font-size:24px;font-weight:900;color:#3B82F6;margin-bottom:4px}
+.printable-document.dark .pdf-process-num{color:#60A5FA}
+
+/* ===== @PAGE & @MEDIA PRINT ===== */
+@page{size:A4;margin:0}
+@media print{
+  body>*:not(#pdf-root){display:none!important}
+  #pdf-root{display:block!important}
+  .printable-document{
+    position:static!important;left:auto!important;
+    width:100%!important;overflow:visible!important;
+  }
+  .pdf-page-break{break-before:page;page-break-before:always}
+  *{
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+    color-adjust:exact!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  .glass,.glass-card,.metric-card,.callout,.step-card,.session-card,.error-card,.info-box,.code-block,.table-wrapper{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+}
 </style>
 </head>
 <body>
+<div id="root">
 
 <!-- HEADER -->
 <header class="site-header" role="banner">
@@ -688,6 +960,10 @@ details .details-content{padding:24px}
       Claude AI Qo'llanma
     </a>
     <div class="header-actions">
+      <button class="pdf-download-btn" id="pdfDownloadBtn" aria-label="PDF yuklab olish">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        PDF
+      </button>
       <button class="theme-toggle" id="themeToggle" aria-label="Mavzuni almashtirish">
         <span class="t-icon sun-i">&#9788;</span>
         <span class="t-icon moon-i">&#9790;</span>
@@ -1321,6 +1597,420 @@ details .details-content{padding:24px}
   <p>2025 Claude AI Qo'llanma. Barcha huquqlar himoyalangan.</p>
 </footer>
 
+</div><!-- end #root -->
+
+<!-- PDF DOWNLOAD MODAL -->
+<div class="pdf-modal-overlay" id="pdfModal">
+  <div class="pdf-modal">
+    <h3>PDF Yuklab Olish</h3>
+    <p>PDF uchun rejimni tanlang:</p>
+    <div class="pdf-theme-options">
+      <button class="pdf-theme-btn selected" id="pdfThemeLight" data-theme="light">
+        <div class="theme-preview light-prev"></div>
+        <div class="theme-label">Yorug'</div>
+      </button>
+      <button class="pdf-theme-btn" id="pdfThemeDark" data-theme="dark">
+        <div class="theme-preview dark-prev"></div>
+        <div class="theme-label">Qorong'u</div>
+      </button>
+    </div>
+    <div class="pdf-modal-actions">
+      <button class="pdf-modal-cancel" id="pdfCancel">Bekor qilish</button>
+      <button class="pdf-modal-download" id="pdfDownload">Yuklab olish</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF ROOT -->
+<div id="pdf-root">
+<div class="printable-document" id="pdf-printable">
+
+<!-- COVER PAGE -->
+<div class="pdf-page pdf-cover">
+  <div class="pdf-cover-badge">Qo'llanma 2026</div>
+  <div class="pdf-cover-title">Claude AI bilan<br>Katta Loyihalarni Qurish</div>
+  <p class="pdf-cover-subtitle">Token tejash, sessiya boshqaruvi va modulli arxitektura — amaliy loyiha misolida o'rganamiz</p>
+  <div class="pdf-cover-metrics">
+    <div class="pdf-metric print-card">
+      <div class="pdf-metric-value blue">~10</div>
+      <div class="pdf-metric-label">daqiqa / sessiya</div>
+    </div>
+    <div class="pdf-metric print-card">
+      <div class="pdf-metric-value green">200K</div>
+      <div class="pdf-metric-label">token kontekst</div>
+    </div>
+    <div class="pdf-metric print-card">
+      <div class="pdf-metric-value yellow">0</div>
+      <div class="pdf-metric-label">xotira sessiyalar orasida</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 01: Kirish -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">01</div>
+  <div class="pdf-section-title">Kirish — Nima Uchun Maxsus Yondashuv Kerak?</div>
+  <p>Claude AI — bu kuchli vosita, lekin katta loyihalarda uni samarasiz ishlatish juda ko'p token sarflaydi va natija past bo'ladi. Bu qo'llanmada biz maxsus yondashuvni o'rganamiz: har bir sessiyani rejalashtirish, modulli arxitektura va xotirani boshqarish orqali samaradorlikni oshirish.</p>
+  <div class="pdf-callout warning">
+    <div class="pdf-callout-title">3 ta asosiy muammo</div>
+    <p style="margin:0;font-size:12px;"><strong>Kontekst cheklovi</strong> — Claude bir vaqtda ~200K token saqlaydi, katta loyihada yetmaydi</p>
+    <p style="margin:0;font-size:12px;"><strong>Xotira yo'qligi</strong> — Har yangi sessiya "bo'sh varaq" dan boshlanadi, oldingi ish unutiladi</p>
+    <p style="margin:0;font-size:12px;"><strong>Token isrofi</strong> — Noto'g'ri yondashuv bilan bir xil ishni qayta-qayta qilish kerak bo'ladi</p>
+  </div>
+  <div class="pdf-callout">
+    <div class="pdf-callout-title">Namuna loyiha: EduPlatform</div>
+    <p style="margin:0;font-size:12px;">Bu qo'llanma davomida biz <strong>EduPlatform</strong> — onlayn ta'lim platformasi misolida ishlash usulini ko'rsatamiz. Loyihada foydalanuvchilar ro'yxatdan o'tadi, kurslarni ko'radi, darslarga yoziladi va progress ni kuzatadi.</p>
+  </div>
+  <h3>Umumiy jarayon — 6 bosqich</h3>
+  <div class="print-grid-3">
+    <div class="print-card pdf-process-step"><div class="pdf-process-num">1</div><p style="margin:0;font-size:12px;font-weight:600">PRD.md yozish</p></div>
+    <div class="print-card pdf-process-step"><div class="pdf-process-num">2</div><p style="margin:0;font-size:12px;font-weight:600">Arxitektura loyihalash</p></div>
+    <div class="print-card pdf-process-step"><div class="pdf-process-num">3</div><p style="margin:0;font-size:12px;font-weight:600">AGENTS.md sozlash</p></div>
+    <div class="print-card pdf-process-step"><div class="pdf-process-num">4</div><p style="margin:0;font-size:12px;font-weight:600">Sessiyalarni rejalashtirish</p></div>
+    <div class="print-card pdf-process-step"><div class="pdf-process-num">5</div><p style="margin:0;font-size:12px;font-weight:600">Bosqichma-bosqich qurish</p></div>
+    <div class="print-card pdf-process-step"><div class="pdf-process-num">6</div><p style="margin:0;font-size:12px;font-weight:600">PROGRESS.md yangilash</p></div>
+  </div>
+</div>
+
+<!-- SECTION 02: PRD.md -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">02</div>
+  <div class="pdf-section-title">Rejalashtirish — PRD.md</div>
+  <p>PRD (Product Requirements Document) — bu loyihangizning "pasporti". Claude ga loyihangiz haqida batafsil ma'lumot beradi va har bir sessiyada kontekstni tiklashga yordam beradi.</p>
+  <h3>EduPlatform uchun PRD.md namunasi</h3>
+  <div class="pdf-code"># EduPlatform — PRD
+
+## Loyiha haqida
+Onlayn ta'lim platformasi. Foydalanuvchilar kurslarni
+ko'radi, darslarga yoziladi, videolarni tomosha qiladi
+va progressni kuzatadi.
+
+## Texnologiyalar
+- Frontend: Next.js 14, TypeScript, Tailwind CSS
+- Backend: Node.js, Express, PostgreSQL
+- Auth: NextAuth.js (Google, GitHub OAuth)
+- Deploy: Vercel (frontend), Railway (backend)
+
+## Asosiy modullar
+1. Auth — ro'yxatdan o'tish, kirish, profil
+2. Courses — kurslar CRUD, kategoriyalar
+3. Lessons — darslar, video, matn kontenti
+4. Progress — foydalanuvchi progressi
+5. Admin — boshqaruv paneli
+
+## API Endpoints
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/courses
+POST /api/courses (admin)
+GET  /api/courses/:id/lessons
+POST /api/progress/update</div>
+  <div class="pdf-callout success">
+    <div class="pdf-callout-title">PRD yozishning 5 ta qoidasi</div>
+    <ol class="pdf-numbered">
+      <li>Aniq texnologiyalar ro'yxatini yozing — Claude to'g'ri kod yozadi</li>
+      <li>Modullarni alohida bo'limlarga ajrating — sessiyalarga bo'lish oson bo'ladi</li>
+      <li>API endpoints ni batafsil yozing — backend ish aniq bo'ladi</li>
+      <li>Ma'lumotlar bazasi sxemasini qo'shing — model tuzilmasi oldindan tayyor bo'ladi</li>
+      <li>Cheklovlarni belgilang — Claude nima qilmasligi kerakligini ham yozing</li>
+    </ol>
+  </div>
+</div>
+
+<!-- SECTION 03: Arxitektura -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">03</div>
+  <div class="pdf-section-title">Arxitektura — Modulli Yondashuv</div>
+  <h3>Monolit vs Modulli</h3>
+  <div class="print-grid-2">
+    <div class="pdf-compare-bad">
+      <h4>Monolit yondashuv</h4>
+      <ul style="padding:0"><li>Bitta katta fayl, 2000+ qator</li><li>Claude kontekstga sig'maydi</li><li>Xatolikni topish qiyin</li><li>Qayta ishlatish imkonsiz</li></ul>
+    </div>
+    <div class="pdf-compare-good">
+      <h4>Modulli yondashuv</h4>
+      <ul style="padding:0"><li>Har fayl 200 qatordan kam</li><li>Har sessiyada 1-2 modul</li><li>Xatolik izolyatsiya qilingan</li><li>Qayta ishlatish oson</li></ul>
+    </div>
+  </div>
+  <h3>Papka tuzilmasi</h3>
+  <div class="pdf-code">eduplatform/
+  docs/
+    PRD.md
+    AGENTS.md
+    PROGRESS.md
+  src/
+    modules/
+      auth/
+        auth.controller.ts    ~120 qator
+        auth.service.ts       ~100 qator
+        auth.routes.ts        ~40 qator
+        auth.test.ts          ~80 qator
+      courses/
+        courses.controller.ts ~150 qator
+        courses.service.ts    ~130 qator
+        courses.routes.ts     ~50 qator
+      lessons/
+      progress/
+    shared/
+      database.ts
+      middleware.ts
+      types.ts</div>
+  <div class="pdf-callout">
+    <div class="pdf-callout-title">200 qator qoidasi</div>
+    <p style="margin:0;font-size:12px;">Har bir fayl 200 qatordan oshmasligi kerak. Bu Claude ning kontekstini tejaydi va har bir sessiyada aniq bir modulga fokuslanish imkonini beradi. Agar fayl 200 qatordan oshsa — uni yana maydaroq modullarga bo'ling.</p>
+  </div>
+</div>
+
+<!-- SECTION 04: AGENTS.md / CLAUDE.md -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">04</div>
+  <div class="pdf-section-title">AGENTS.md va CLAUDE.md</div>
+  <p>AGENTS.md va CLAUDE.md — Claude uchun "ko'rsatma" fayllar. Ular Claude ga loyihangizda qanday ishlash kerakligini tushuntiradi.</p>
+  <h3>Farqlar</h3>
+  <table>
+    <thead><tr><th>Xususiyat</th><th>CLAUDE.md</th><th>AGENTS.md</th></tr></thead>
+    <tbody>
+      <tr><td>Maqsad</td><td>Umumiy loyiha qoidalari</td><td>Har bir agent uchun alohida ko'rsatmalar</td></tr>
+      <tr><td>Joylashuvi</td><td>Loyiha ildiz papkasida</td><td>docs/ papkasida yoki ildizda</td></tr>
+      <tr><td>Tarkibi</td><td>Kod uslubi, til, taqiqlar</td><td>Rol, imkoniyatlar, cheklovlar</td></tr>
+      <tr><td>Qachon o'qiladi</td><td>Har sessiya boshida avtomatik</td><td>Kontekst sifatida berilganda</td></tr>
+    </tbody>
+  </table>
+  <h3>AGENTS.md namunasi</h3>
+  <div class="pdf-code"># EduPlatform — Agent Ko'rsatmalari
+
+## Rol
+Sen tajribali full-stack dasturchisan.
+EduPlatform loyihasida ishlaysan.
+
+## Texnologiyalar
+- Next.js 14, TypeScript, Tailwind CSS
+- Node.js, Express, PostgreSQL
+- Har doim TypeScript ishlatasan
+
+## Qoidalar
+- Har bir fayl 200 qatordan oshmasin
+- Har funksiya 50 qatordan oshmasin
+- any tipini HECH QACHON ishlatma
+- Har modulda test yoz
+- Kommentariyalarni o'zbek tilida yoz
+
+## Fayl tuzilmasi
+src/modules/[modul]/ ichida ishlaysan.
+Har modul: controller, service, routes, test.
+
+## Xotira
+Sessiya boshida PROGRESS.md ni o'qi.
+Sessiya oxirida PROGRESS.md ni yangilay.</div>
+  <div class="pdf-callout success">
+    <div class="pdf-callout-title">AGENTS.md yozish sirlari</div>
+    <ol class="pdf-numbered">
+      <li>Aniq rol bering — "Sen tajribali backend dasturchi" kabi</li>
+      <li>Taqiqlarni yozing — nima qilmasligi kerak</li>
+      <li>Fayl tuzilmasi ko'rsating — qayerga qanday fayl yaratish kerak</li>
+      <li>Kod uslubini belgilang — naming convention, lint qoidalari</li>
+      <li>Xotira mexanizmini ko'rsating — PROGRESS.md bilan ishlash tartibi</li>
+    </ol>
+  </div>
+</div>
+
+<!-- SECTION 05: Sessiya Strategiyasi -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">05</div>
+  <div class="pdf-section-title">Sessiya Strategiyasi</div>
+  <div class="pdf-callout">
+    <div class="pdf-callout-title">Asosiy qoida: 1 sessiya = 1-2 modul</div>
+    <p style="margin:0;font-size:12px;">Har bir sessiyada faqat 1-2 ta modulni yarating yoki yangilang. Bu Claude ning kontekst oynasidan samarali foydalanishni ta'minlaydi va token isrofini kamaytiradi.</p>
+  </div>
+  <h3>10 sessiya rejasi — EduPlatform</h3>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 1: Loyiha asosi</span><br><span class="pdf-timeline-desc">package.json, tsconfig, database setup, shared utilities</span></div>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 2: Auth moduli</span><br><span class="pdf-timeline-desc">Register, login, JWT, middleware</span></div>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 3: User profil</span><br><span class="pdf-timeline-desc">Profil CRUD, avatar upload, settings</span></div>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 4: Kurslar CRUD</span><br><span class="pdf-timeline-desc">Kurslarni yaratish, o'qish, yangilash, o'chirish</span></div>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 5: Darslar moduli</span><br><span class="pdf-timeline-desc">Darslar CRUD, video integration</span></div>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 6: Progress tracking</span><br><span class="pdf-timeline-desc">Foydalanuvchi progressi, statistika</span></div>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 7: Admin panel</span><br><span class="pdf-timeline-desc">Boshqaruv paneli, dashboard</span></div>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 8: Frontend sahifalar</span><br><span class="pdf-timeline-desc">Landing, kurslar ro'yxati, kurs sahifasi</span></div>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 9: UI polish</span><br><span class="pdf-timeline-desc">Responsive dizayn, animatsiyalar, UX</span></div>
+  <div class="pdf-timeline-item"><span class="pdf-timeline-title">Sessiya 10: Deploy</span><br><span class="pdf-timeline-desc">CI/CD, deploy, monitoring, testing</span></div>
+  <div class="pdf-callout" style="margin-top:16px;">
+    <div class="pdf-callout-title">Token tejash hisob-kitobi</div>
+    <p style="margin:0;font-size:12px;">Oddiy yondashuv: ~50K token/sessiya (takroriy kontekst bilan). Modulli yondashuv: ~15-20K token/sessiya. Tejash: <strong>60-70%</strong> kam token sarflanadi!</p>
+  </div>
+</div>
+
+<!-- SECTION 06: PROGRESS.md -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">06</div>
+  <div class="pdf-section-title">PROGRESS.md — Xotira Tizimi</div>
+  <p>Claude har yangi sessiyada hamma narsani unutadi. PROGRESS.md — bu sessiyalar orasida ma'lumot saqlash usuli. Har sessiya oxirida yangilanadi, har sessiya boshida o'qiladi.</p>
+  <h3>PROGRESS.md namunasi</h3>
+  <div class="pdf-code"># EduPlatform — Progress
+
+## Umumiy holat: 30% tayyor
+
+## Tugallangan modullar
+[x] Loyiha asosi (package.json, tsconfig, DB)
+[x] Auth moduli (register, login, JWT)
+[x] User profil (CRUD, avatar)
+
+## Hozirgi modul: Kurslar CRUD
+Holat: 50% — CRUD tayyor, testlar yozilmoqda
+Fayllar:
+  - src/modules/courses/courses.controller.ts
+  - src/modules/courses/courses.service.ts
+  - src/modules/courses/courses.routes.ts
+
+## Keyingi qadam
+- Kurslar uchun testlar yozish
+- Kategoriyalar qo'shish
+- Pagination qo'shish
+
+## Ma'lum muammolar
+- PostgreSQL connection pooling sozlanmagan
+- Upload uchun S3 konfiguratsiya kerak</div>
+  <h3>Xotira usullari taqqoslash</h3>
+  <table>
+    <thead><tr><th>Usul</th><th>Qulaylik</th><th>Kamchilik</th><th>Tavsiya</th></tr></thead>
+    <tbody>
+      <tr><td>PROGRESS.md</td><td>Oddiy, tushunarli</td><td>Qo'lda yangilash kerak</td><td>Kichik-o'rta loyihalar</td></tr>
+      <tr><td>Claude Memory</td><td>Avtomatik</td><td>Cheklangan hajm</td><td>Kichik loyihalar</td></tr>
+      <tr><td>Tasks / TODO</td><td>Tezkor</td><td>Batafsil emas</td><td>Kundalik vazifalar</td></tr>
+      <tr><td>Git commits</td><td>Tarixiy</td><td>O'qish qiyin</td><td>Qo'shimcha sifatida</td></tr>
+    </tbody>
+  </table>
+  <div class="pdf-callout success">
+    <div class="pdf-callout-title">5 ta best practice</div>
+    <ol class="pdf-numbered">
+      <li>Har sessiya oxirida PROGRESS.md ni yangilashni UNUTMANG</li>
+      <li>Faqat kerakli ma'lumotni yozing — ortiqchasi token sarflaydi</li>
+      <li>Muammolarni alohida bo'limda yozing — keyingi sessiyada hal qilish oson</li>
+      <li>Foiz ko'rsating (30%, 50%) — umumiy holatni tushunish oson</li>
+      <li>Fayl nomlari va yo'llarini aniq yozing — Claude tezroq topadi</li>
+    </ol>
+  </div>
+</div>
+
+<!-- SECTION 07: Amaliy Namuna -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">07</div>
+  <div class="pdf-section-title">Amaliy Namuna — 3 Sessiya</div>
+  <div class="print-card pdf-session" style="margin-bottom:14px">
+    <h4>Sessiya #1: Loyiha asosi</h4>
+    <div class="pdf-code" style="font-size:10px;">Yangi loyiha boshlaymiz: EduPlatform.
+AGENTS.md dagi qoidalarga amal qil.
+
+Bugun loyiha asosini yaratamiz:
+1. package.json (dependencies)
+2. tsconfig.json
+3. src/shared/database.ts (PostgreSQL)
+4. src/shared/middleware.ts (error handler)
+5. src/shared/types.ts (umumiy tiplar)
+6. src/app.ts (Express setup)</div>
+    <ul class="pdf-checklist"><li>package.json yaratildi</li><li>TypeScript konfiguratsiya tayyor</li><li>Database connection ishlaydi</li><li>Error handling middleware tayyor</li><li>PROGRESS.md yangilandi</li></ul>
+  </div>
+  <div class="print-card pdf-session" style="margin-bottom:14px">
+    <h4>Sessiya #2: Auth moduli</h4>
+    <div class="pdf-code" style="font-size:10px;">PROGRESS.md ni o'qi. Auth modulini yaratamiz.
+
+src/modules/auth/ ichida:
+- auth.controller.ts (register, login)
+- auth.service.ts (bcrypt, JWT)
+- auth.routes.ts
+- auth.test.ts</div>
+    <ul class="pdf-checklist"><li>Register endpoint ishlaydi</li><li>Login va JWT token ishlaydi</li><li>Auth middleware tayyor</li><li>Testlar yashil</li><li>PROGRESS.md yangilandi</li></ul>
+  </div>
+  <div class="print-card pdf-session">
+    <h4>Sessiya #3: Kurslar CRUD</h4>
+    <div class="pdf-code" style="font-size:10px;">PROGRESS.md ni o'qi. Kurslar modulini yaratamiz.
+
+src/modules/courses/ ichida:
+- courses.controller.ts (CRUD)
+- courses.service.ts
+- courses.routes.ts
+- Auth middleware bilan himoyalash</div>
+    <ul class="pdf-checklist"><li>GET /api/courses ishlaydi</li><li>POST /api/courses (faqat admin)</li><li>PUT va DELETE endpointlari</li><li>Pagination qo'shildi</li><li>PROGRESS.md yangilandi</li></ul>
+  </div>
+</div>
+
+<!-- SECTION 08: Token Optimallashtirish -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">08</div>
+  <div class="pdf-section-title">Token Optimallashtirish</div>
+  <h3>Token sarfi taqqoslash</h3>
+  <table>
+    <thead><tr><th>Amal</th><th>Oddiy usul</th><th>Optimal usul</th><th>Tejash</th></tr></thead>
+    <tbody>
+      <tr><td>Kontekst berish</td><td>~15K token</td><td>~3K token</td><td>80%</td></tr>
+      <tr><td>Modul yaratish</td><td>~20K token</td><td>~8K token</td><td>60%</td></tr>
+      <tr><td>Xato tuzatish</td><td>~10K token</td><td>~3K token</td><td>70%</td></tr>
+      <tr><td>Refaktoring</td><td>~25K token</td><td>~10K token</td><td>60%</td></tr>
+      <tr><td>Test yozish</td><td>~12K token</td><td>~5K token</td><td>58%</td></tr>
+      <tr><td><strong>Sessiya jami</strong></td><td><strong>~50K token</strong></td><td><strong>~18K token</strong></td><td><strong>64%</strong></td></tr>
+    </tbody>
+  </table>
+  <h3>10 ta oltin qoida</h3>
+  <div class="print-grid-2">
+    <div class="print-card pdf-step"><div class="pdf-step-num">01</div><div class="pdf-step-title">Aniq prompt yozing</div><div class="pdf-step-desc">Umumiy so'rov o'rniga aniq fayl nomlari va vazifalarni ko'rsating.</div></div>
+    <div class="print-card pdf-step"><div class="pdf-step-num">02</div><div class="pdf-step-title">AGENTS.md ishlating</div><div class="pdf-step-desc">Har sessiyada qoidalarni takrorlamasdan, faylga yozib qo'ying.</div></div>
+    <div class="print-card pdf-step"><div class="pdf-step-num">03</div><div class="pdf-step-title">1 sessiya = 1 modul</div><div class="pdf-step-desc">Kichik, fokusli sessiyalar samaraliroq ishlaydi.</div></div>
+    <div class="print-card pdf-step"><div class="pdf-step-num">04</div><div class="pdf-step-title">200 qator limiti</div><div class="pdf-step-desc">Fayllarni kichik saqlang — kontekst tejaldi.</div></div>
+    <div class="print-card pdf-step"><div class="pdf-step-num">05</div><div class="pdf-step-title">PROGRESS.md yuritish</div><div class="pdf-step-desc">Sessiyalar orasida xotira sifatida foydalaning.</div></div>
+    <div class="print-card pdf-step"><div class="pdf-step-num">06</div><div class="pdf-step-title">Takrorlashdan saqlaning</div><div class="pdf-step-desc">Bir xil narsani qayta so'ramaslik uchun natijalarni saqlang.</div></div>
+    <div class="print-card pdf-step"><div class="pdf-step-num">07</div><div class="pdf-step-title">Batch operatsiyalar</div><div class="pdf-step-desc">Bir nechta kichik so'rov o'rniga bitta batafsil so'rov yuboring.</div></div>
+    <div class="print-card pdf-step"><div class="pdf-step-num">08</div><div class="pdf-step-title">Ortiqcha kodni bermang</div><div class="pdf-step-desc">Faqat kerakli fayllarni kontekstga qo'shing.</div></div>
+    <div class="print-card pdf-step"><div class="pdf-step-num">09</div><div class="pdf-step-title">Namuna bering</div><div class="pdf-step-desc">Ko'p tushuntirish o'rniga bitta namuna bering — Claude tezroq tushunadi.</div></div>
+    <div class="print-card pdf-step"><div class="pdf-step-num">10</div><div class="pdf-step-title">Sessiyani to'g'ri tugatish</div><div class="pdf-step-desc">Har sessiya oxirida xotirani yangilang va natijani tekshiring.</div></div>
+  </div>
+</div>
+
+<!-- SECTION 09: Xatolar -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">09</div>
+  <div class="pdf-section-title">Tez-tez Uchraydigan Xatolar</div>
+  <div class="pdf-error"><div class="pdf-error-name">1. Kontekstni haddan tashqari to'ldirish</div><div class="pdf-error-problem">Butun loyiha kodini bir sessiyaga joylashtirish — 200K token cheklovi tufayli Claude ishlamay qoladi.</div><div class="pdf-error-solution"><strong>Yechim:</strong> Faqat joriy modul fayllarini bering. AGENTS.md va PROGRESS.md kontekst uchun yetarli.</div></div>
+  <div class="pdf-error"><div class="pdf-error-name">2. PROGRESS.md yangilamaslik</div><div class="pdf-error-problem">Keyingi sessiyada Claude hamma narsani unutadi va qaytadan boshdan ishlaydi.</div><div class="pdf-error-solution"><strong>Yechim:</strong> Har sessiya oxirida PROGRESS.md yangilashni odat qiling. Prompt oxiriga eslatma qo'shing.</div></div>
+  <div class="pdf-error"><div class="pdf-error-name">3. Juda umumiy prompt berish</div><div class="pdf-error-problem">"Menga web app yasa" kabi umumiy so'rov — natija sifatsiz bo'ladi.</div><div class="pdf-error-solution"><strong>Yechim:</strong> Aniq fayl nomlari, endpoint lar va texnologiyalarni ko'rsating.</div></div>
+  <div class="pdf-error"><div class="pdf-error-name">4. Katta fayllar yaratish</div><div class="pdf-error-problem">500+ qatorli fayllar — Claude keyingi sessiyada to'liq o'qiy olmaydi.</div><div class="pdf-error-solution"><strong>Yechim:</strong> 200 qator limitiga rioya qiling. Katta fayllarni modullarga bo'ling.</div></div>
+  <div class="pdf-error"><div class="pdf-error-name">5. Sessiyada juda ko'p ish</div><div class="pdf-error-problem">Bir sessiyada 5+ modul yaratish — sifat pasayadi, xatolar ko'payadi.</div><div class="pdf-error-solution"><strong>Yechim:</strong> 1 sessiya = 1-2 modul. Sifat muhimroq tezlikdan.</div></div>
+  <div class="pdf-error"><div class="pdf-error-name">6. Testlarni keyinga qoldirish</div><div class="pdf-error-problem">Barcha modullar tayyor bo'lgandan keyin test yozish — xatolar ko'p bo'ladi.</div><div class="pdf-error-solution"><strong>Yechim:</strong> Har modul bilan birga testini ham yozing. Sessiya oxirida testlar yashil bo'lishi kerak.</div></div>
+</div>
+
+<!-- SECTION 10: Xulosa -->
+<div class="pdf-page pdf-page-break">
+  <div class="pdf-section-num">10</div>
+  <div class="pdf-section-title">Xulosa</div>
+  <h3>Loyiha hayot aylanmasi</h3>
+  <div class="print-grid-3">
+    <div class="print-card pdf-lifecycle"><div class="pdf-lifecycle-num">1</div><div class="pdf-lifecycle-title">Rejalashtirish</div><div class="pdf-lifecycle-desc">PRD.md yozish, talablarni aniqlash</div></div>
+    <div class="print-card pdf-lifecycle"><div class="pdf-lifecycle-num">2</div><div class="pdf-lifecycle-title">Arxitektura</div><div class="pdf-lifecycle-desc">Papka tuzilmasi, modullar rejasi</div></div>
+    <div class="print-card pdf-lifecycle"><div class="pdf-lifecycle-num">3</div><div class="pdf-lifecycle-title">Sozlash</div><div class="pdf-lifecycle-desc">AGENTS.md, PROGRESS.md yaratish</div></div>
+    <div class="print-card pdf-lifecycle"><div class="pdf-lifecycle-num">4</div><div class="pdf-lifecycle-title">Qurish</div><div class="pdf-lifecycle-desc">Sessiyama-sessiya modullarni yaratish</div></div>
+    <div class="print-card pdf-lifecycle"><div class="pdf-lifecycle-num">5</div><div class="pdf-lifecycle-title">Testlash</div><div class="pdf-lifecycle-desc">Har modul uchun testlar yozish</div></div>
+    <div class="print-card pdf-lifecycle"><div class="pdf-lifecycle-num">6</div><div class="pdf-lifecycle-title">Deploy</div><div class="pdf-lifecycle-desc">CI/CD, monitoring, ishga tushirish</div></div>
+  </div>
+  <h3>Loyiha hajmiga qarab tavsiyalar</h3>
+  <table>
+    <thead><tr><th>Loyiha hajmi</th><th>Sessiyalar soni</th><th>PROGRESS.md</th><th>AGENTS.md</th></tr></thead>
+    <tbody>
+      <tr><td>Kichik (1-3 kun)</td><td>2-4</td><td>Oddiy</td><td>Ixtiyoriy</td></tr>
+      <tr><td>O'rta (1-2 hafta)</td><td>5-10</td><td>Batafsil</td><td>Zarur</td></tr>
+      <tr><td>Katta (1+ oy)</td><td>15-30</td><td>Juda batafsil</td><td>Majburiy</td></tr>
+      <tr><td>Enterprise</td><td>50+</td><td>Avtomatlashtirilgan</td><td>Bir nechta agent</td></tr>
+    </tbody>
+  </table>
+  <div class="pdf-cta">
+    <h3>Katta loyihalar — kichik qadamlar bilan quriladi</h3>
+    <p>Har bir sessiya — bitta qadam. Har bir modul — bitta g'isht. Sabrli va rejali ishlang, natija ajoyib bo'ladi.</p>
+  </div>
+  <div class="pdf-footer">
+    <p style="margin:0;">2025 Claude AI Qo'llanma. Barcha huquqlar himoyalangan.</p>
+  </div>
+</div>
+
+</div><!-- end .printable-document -->
+</div><!-- end #pdf-root -->
+
 <script>
 // ===== THEME =====
 (function(){
@@ -1424,6 +2114,66 @@ function copyCode(btn){
       });
     },{threshold:0.15}).observe(container);
   });
+})();
+// ===== PDF DOWNLOAD =====
+(function(){
+  var pdfBtn=document.getElementById('pdfDownloadBtn');
+  var modal=document.getElementById('pdfModal');
+  var cancelBtn=document.getElementById('pdfCancel');
+  var downloadBtn=document.getElementById('pdfDownload');
+  var lightBtn=document.getElementById('pdfThemeLight');
+  var darkBtn=document.getElementById('pdfThemeDark');
+  var selectedTheme='light';
+
+  pdfBtn.addEventListener('click',function(){modal.classList.add('show')});
+  cancelBtn.addEventListener('click',function(){modal.classList.remove('show')});
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.classList.remove('show')});
+
+  lightBtn.addEventListener('click',function(){
+    selectedTheme='light';
+    lightBtn.classList.add('selected');darkBtn.classList.remove('selected');
+  });
+  darkBtn.addEventListener('click',function(){
+    selectedTheme='dark';
+    darkBtn.classList.add('selected');lightBtn.classList.remove('selected');
+  });
+
+  downloadBtn.addEventListener('click',function(){
+    modal.classList.remove('show');
+    triggerPrint(selectedTheme);
+  });
+
+  function triggerPrint(theme){
+    var printEl=document.getElementById('pdf-printable');
+    var root=document.getElementById('root');
+
+    if(theme==='dark')printEl.classList.add('dark');
+    else printEl.classList.remove('dark');
+
+    root.style.display='none';
+    printEl.style.position='static';
+    printEl.style.left='auto';
+    printEl.style.overflow='visible';
+    printEl.style.width='100%';
+
+    function restore(){
+      root.style.display='';
+      printEl.style.position='';
+      printEl.style.left='';
+      printEl.style.overflow='';
+      printEl.style.width='';
+      window.removeEventListener('afterprint',restore);
+    }
+
+    window.addEventListener('afterprint',restore);
+
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        window.print();
+        setTimeout(function(){if(printEl.style.position!=='absolute')restore()},1000);
+      });
+    });
+  }
 })();
 </script>
 </body>
