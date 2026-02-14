@@ -947,7 +947,36 @@ details .details-content{padding:24px}
     -webkit-backdrop-filter:none!important;
   }
 }
+/* ===== ANTI-FLASH ===== */
+html:not([data-lang-ready]) body{opacity:0}
+html[data-lang-ready] body{transition:opacity 0.15s}
+/* ===== LANGUAGE SWITCHER ===== */
+.lang-switcher{position:relative}
+.lang-btn{
+  background:var(--bg-overlay);border:1px solid var(--border-medium);
+  border-radius:12px;padding:8px 12px;cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--text-300);
+  display:flex;align-items:center;gap:6px;
+  transition:all 0.25s ease;font-family:var(--font);
+}
+.lang-btn:hover{border-color:var(--blue);color:var(--text-100);background:var(--bg-surface)}
+.lang-dropdown{
+  display:none;position:absolute;top:calc(100% + 6px);right:0;
+  background:var(--bg-raised);border:1px solid var(--border-medium);
+  border-radius:12px;overflow:hidden;min-width:130px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:100;
+}
+.lang-dropdown.open{display:block}
+.lang-option{
+  display:block;width:100%;padding:10px 16px;border:none;
+  background:none;cursor:pointer;font-size:13px;font-weight:500;
+  color:var(--text-300);text-align:left;font-family:var(--font);
+  transition:background 0.15s;
+}
+.lang-option:hover{background:var(--bg-overlay);color:var(--text-100)}
+.lang-option.active{color:var(--blue-bright);font-weight:700}
 </style>
+<script>(function(){var l=localStorage.getItem('lang');if(l&&/^(uz|en|ru)$/.test(l))document.documentElement.setAttribute('lang',l)})()</script>
 </head>
 <body>
 <div id="root">
@@ -957,13 +986,24 @@ details .details-content{padding:24px}
   <div class="header-inner">
     <a href="#" class="site-logo">
       <span class="logo-icon">C</span>
-      Claude AI Qo'llanma
+      <span data-i18n="header.logo">Claude AI Qo'llanma</span>
     </a>
     <div class="header-actions">
       <button class="pdf-download-btn" id="pdfDownloadBtn" aria-label="PDF yuklab olish">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         PDF
       </button>
+      <div class="lang-switcher">
+        <button class="lang-btn" id="langBtn" aria-label="Tilni tanlash">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span id="langLabel">UZ</span>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-option active" data-lang="uz">O'zbekcha</button>
+          <button class="lang-option" data-lang="en">English</button>
+          <button class="lang-option" data-lang="ru">Русский</button>
+        </div>
+      </div>
       <button class="theme-toggle" id="themeToggle" aria-label="Mavzuni almashtirish">
         <span class="t-icon sun-i">&#9788;</span>
         <span class="t-icon moon-i">&#9790;</span>
@@ -978,7 +1018,7 @@ details .details-content{padding:24px}
 <div class="mobile-modal" id="mobileModal">
   <div class="mobile-modal-content">
     <div class="mobile-modal-header">
-      <h3>Mundarija</h3>
+      <h3 data-i18n="mobileToc.title">Mundarija</h3>
       <button class="mobile-close" id="mobileClose" aria-label="Yopish">&#10005;</button>
     </div>
     <ul class="mobile-nav" id="mobileNav"></ul>
@@ -991,16 +1031,16 @@ details .details-content{padding:24px}
 <!-- SIDEBAR -->
 <aside class="sidebar" role="navigation" aria-label="Bo'limlar">
   <ul class="sidebar-nav" id="sidebarNav">
-    <li><a href="#section-01"><span class="nav-num">01</span> Kirish</a></li>
-    <li><a href="#section-02"><span class="nav-num">02</span> PRD.md — Rejalashtirish</a></li>
-    <li><a href="#section-03"><span class="nav-num">03</span> Arxitektura</a></li>
-    <li><a href="#section-04"><span class="nav-num">04</span> AGENTS.md / CLAUDE.md</a></li>
-    <li><a href="#section-05"><span class="nav-num">05</span> Sessiya strategiyasi</a></li>
-    <li><a href="#section-06"><span class="nav-num">06</span> PROGRESS.md</a></li>
-    <li><a href="#section-07"><span class="nav-num">07</span> Amaliy namuna</a></li>
-    <li><a href="#section-08"><span class="nav-num">08</span> Token optimallashtirish</a></li>
-    <li><a href="#section-09"><span class="nav-num">09</span> Xatolar</a></li>
-    <li><a href="#section-10"><span class="nav-num">10</span> Xulosa</a></li>
+    <li><a href="#section-01"><span class="nav-num">01</span> <span data-i18n="nav.01">Kirish</span></a></li>
+    <li><a href="#section-02"><span class="nav-num">02</span> <span data-i18n="nav.02">PRD.md — Rejalashtirish</span></a></li>
+    <li><a href="#section-03"><span class="nav-num">03</span> <span data-i18n="nav.03">Arxitektura</span></a></li>
+    <li><a href="#section-04"><span class="nav-num">04</span> <span data-i18n="nav.04">AGENTS.md / CLAUDE.md</span></a></li>
+    <li><a href="#section-05"><span class="nav-num">05</span> <span data-i18n="nav.05">Sessiya strategiyasi</span></a></li>
+    <li><a href="#section-06"><span class="nav-num">06</span> <span data-i18n="nav.06">PROGRESS.md</span></a></li>
+    <li><a href="#section-07"><span class="nav-num">07</span> <span data-i18n="nav.07">Amaliy namuna</span></a></li>
+    <li><a href="#section-08"><span class="nav-num">08</span> <span data-i18n="nav.08">Token optimallashtirish</span></a></li>
+    <li><a href="#section-09"><span class="nav-num">09</span> <span data-i18n="nav.09">Xatolar</span></a></li>
+    <li><a href="#section-10"><span class="nav-num">10</span> <span data-i18n="nav.10">Xulosa</span></a></li>
   </ul>
 </aside>
 
@@ -1009,21 +1049,21 @@ details .details-content{padding:24px}
 
 <!-- HERO -->
 <section class="hero" aria-label="Asosiy sarlavha">
-  <div class="hero-badge reveal"><span class="dot"></span> Qo'llanma 2026</div>
-  <h1 class="reveal">Claude AI bilan<br>Katta Loyihalarni Qurish</h1>
-  <p class="subtitle reveal">Token tejash, sessiya boshqaruvi va modulli arxitektura — amaliy loyiha misolida o'rganamiz</p>
+  <div class="hero-badge reveal"><span class="dot"></span> <span data-i18n="hero.badge">Qo'llanma 2026</span></div>
+  <h1 class="reveal" data-i18n-html="hero.h1">Claude AI bilan<br>Katta Loyihalarni Qurish</h1>
+  <p class="subtitle reveal" data-i18n="hero.subtitle">Token tejash, sessiya boshqaruvi va modulli arxitektura — amaliy loyiha misolida o'rganamiz</p>
   <div class="metric-cards">
     <div class="metric-card m-blue reveal">
       <div class="metric-value" data-target="10" data-prefix="~">0</div>
-      <div class="metric-label">daqiqa / sessiya</div>
+      <div class="metric-label" data-i18n="hero.m1">daqiqa / sessiya</div>
     </div>
     <div class="metric-card m-green reveal">
       <div class="metric-value" data-target="200" data-suffix="K">0</div>
-      <div class="metric-label">token kontekst</div>
+      <div class="metric-label" data-i18n="hero.m2">token kontekst</div>
     </div>
     <div class="metric-card m-yellow reveal">
       <div class="metric-value" data-target="0">0</div>
-      <div class="metric-label">xotira sessiyalar orasida</div>
+      <div class="metric-label" data-i18n="hero.m3">xotira sessiyalar orasida</div>
     </div>
   </div>
 </section>
@@ -1034,31 +1074,31 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-rocket" aria-hidden="true"></div>
     <div>
       <span class="section-num">01</span>
-      <h2>Kirish — Nima Uchun Maxsus Yondashuv Kerak?</h2>
+      <h2 data-i18n="s01.title">Kirish — Nima Uchun Maxsus Yondashuv Kerak?</h2>
     </div>
   </div>
   <div class="section-body">
-    <p class="reveal">Claude AI — bu kuchli vosita, lekin katta loyihalarda uni samarasiz ishlatish juda ko'p token sarflaydi va natija past bo'ladi. Bu qo'llanmada biz maxsus yondashuvni o'rganamiz: har bir sessiyani rejalashtirish, modulli arxitektura va xotirani boshqarish orqali samaradorlikni oshirish.</p>
+    <p class="reveal" data-i18n="s01.p1">Claude AI — bu kuchli vosita, lekin katta loyihalarda uni samarasiz ishlatish juda ko'p token sarflaydi va natija past bo'ladi. Bu qo'llanmada biz maxsus yondashuvni o'rganamiz: har bir sessiyani rejalashtirish, modulli arxitektura va xotirani boshqarish orqali samaradorlikni oshirish.</p>
     <div class="callout warning reveal">
-      <div class="callout-title">3 ta asosiy muammo</div>
+      <div class="callout-title" data-i18n="s01.callout1">3 ta asosiy muammo</div>
       <ul style="list-style:none;padding:0;">
-        <li style="padding:7px 0;"><strong>Kontekst cheklovi</strong> — Claude bir vaqtda ~200K token saqlaydi, katta loyihada yetmaydi</li>
-        <li style="padding:7px 0;"><strong>Xotira yo'qligi</strong> — Har yangi sessiya "bo'sh varaq" dan boshlanadi, oldingi ish unutiladi</li>
-        <li style="padding:7px 0;"><strong>Token isrofi</strong> — Noto'g'ri yondashuv bilan bir xil ishni qayta-qayta qilish kerak bo'ladi</li>
+        <li style="padding:7px 0;" data-i18n-html="s01.prob1"><strong>Kontekst cheklovi</strong> — Claude bir vaqtda ~200K token saqlaydi, katta loyihada yetmaydi</li>
+        <li style="padding:7px 0;" data-i18n-html="s01.prob2"><strong>Xotira yo'qligi</strong> — Har yangi sessiya "bo'sh varaq" dan boshlanadi, oldingi ish unutiladi</li>
+        <li style="padding:7px 0;" data-i18n-html="s01.prob3"><strong>Token isrofi</strong> — Noto'g'ri yondashuv bilan bir xil ishni qayta-qayta qilish kerak bo'ladi</li>
       </ul>
     </div>
     <div class="info-box reveal">
-      <div class="info-box-title">Namuna loyiha: EduPlatform</div>
-      <p style="margin:0;font-size:15px;">Bu qo'llanma davomida biz <strong>EduPlatform</strong> — onlayn ta'lim platformasi misolida ishlash usulini ko'rsatamiz. Loyihada foydalanuvchilar ro'yxatdan o'tadi, kurslarni ko'radi, darslarga yoziladi va progress ni kuzatadi.</p>
+      <div class="info-box-title" data-i18n="s01.info1t">Namuna loyiha: EduPlatform</div>
+      <p style="margin:0;font-size:15px;" data-i18n-html="s01.info1">Bu qo'llanma davomida biz <strong>EduPlatform</strong> — onlayn ta'lim platformasi misolida ishlash usulini ko'rsatamiz. Loyihada foydalanuvchilar ro'yxatdan o'tadi, kurslarni ko'radi, darslarga yoziladi va progress ni kuzatadi.</p>
     </div>
-    <h3 class="reveal">Umumiy jarayon — 6 bosqich</h3>
+    <h3 class="reveal" data-i18n="s01.h3">Umumiy jarayon — 6 bosqich</h3>
     <div class="process-grid reveal">
-      <div class="process-step"><div class="process-step-num">1</div>PRD.md yozish</div>
-      <div class="process-step"><div class="process-step-num">2</div>Arxitektura loyihalash</div>
-      <div class="process-step"><div class="process-step-num">3</div>AGENTS.md sozlash</div>
-      <div class="process-step"><div class="process-step-num">4</div>Sessiyalarni rejalashtirish</div>
-      <div class="process-step"><div class="process-step-num">5</div>Bosqichma-bosqich qurish</div>
-      <div class="process-step"><div class="process-step-num">6</div>PROGRESS.md yangilash</div>
+      <div class="process-step"><div class="process-step-num">1</div><span data-i18n="s01.ps1">PRD.md yozish</span></div>
+      <div class="process-step"><div class="process-step-num">2</div><span data-i18n="s01.ps2">Arxitektura loyihalash</span></div>
+      <div class="process-step"><div class="process-step-num">3</div><span data-i18n="s01.ps3">AGENTS.md sozlash</span></div>
+      <div class="process-step"><div class="process-step-num">4</div><span data-i18n="s01.ps4">Sessiyalarni rejalashtirish</span></div>
+      <div class="process-step"><div class="process-step-num">5</div><span data-i18n="s01.ps5">Bosqichma-bosqich qurish</span></div>
+      <div class="process-step"><div class="process-step-num">6</div><span data-i18n="s01.ps6">PROGRESS.md yangilash</span></div>
     </div>
   </div>
 </section>
@@ -1069,12 +1109,12 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-clipboard" aria-hidden="true"></div>
     <div>
       <span class="section-num">02</span>
-      <h2>Rejalashtirish — PRD.md</h2>
+      <h2 data-i18n="s02.title">Rejalashtirish — PRD.md</h2>
     </div>
   </div>
   <div class="section-body">
-    <p class="reveal">PRD (Product Requirements Document) — bu loyihangizning "pasporti". Claude ga loyihangiz haqida batafsil ma'lumot beradi va har bir sessiyada kontekstni tiklashga yordam beradi.</p>
-    <h3 class="reveal">EduPlatform uchun PRD.md namunasi</h3>
+    <p class="reveal" data-i18n="s02.p1">PRD (Product Requirements Document) — bu loyihangizning "pasporti". Claude ga loyihangiz haqida batafsil ma'lumot beradi va har bir sessiyada kontekstni tiklashga yordam beradi.</p>
+    <h3 class="reveal" data-i18n="s02.h3a">EduPlatform uchun PRD.md namunasi</h3>
     <div class="code-block reveal">
       <div class="code-header">
         <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
@@ -1112,13 +1152,13 @@ details .details-content{padding:24px}
       </div>
     </div>
     <div class="callout success reveal">
-      <div class="callout-title">PRD yozishning 5 ta qoidasi</div>
+      <div class="callout-title" data-i18n="s02.callout1">PRD yozishning 5 ta qoidasi</div>
       <ol class="numbered-list">
-        <li>Aniq texnologiyalar ro'yxatini yozing — Claude to'g'ri kod yozadi</li>
-        <li>Modullarni alohida bo'limlarga ajrating — sessiyalarga bo'lish oson bo'ladi</li>
-        <li>API endpoints ni batafsil yozing — backend ish aniq bo'ladi</li>
-        <li>Ma'lumotlar bazasi sxemasini qo'shing — model tuzilmasi oldindan tayyor bo'ladi</li>
-        <li>Cheklovlarni belgilang — Claude nima qilmasligi kerakligini ham yozing</li>
+        <li data-i18n="s02.rule1">Aniq texnologiyalar ro'yxatini yozing — Claude to'g'ri kod yozadi</li>
+        <li data-i18n="s02.rule2">Modullarni alohida bo'limlarga ajrating — sessiyalarga bo'lish oson bo'ladi</li>
+        <li data-i18n="s02.rule3">API endpoints ni batafsil yozing — backend ish aniq bo'ladi</li>
+        <li data-i18n="s02.rule4">Ma'lumotlar bazasi sxemasini qo'shing — model tuzilmasi oldindan tayyor bo'ladi</li>
+        <li data-i18n="s02.rule5">Cheklovlarni belgilang — Claude nima qilmasligi kerakligini ham yozing</li>
       </ol>
     </div>
   </div>
@@ -1130,32 +1170,32 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-cube" aria-hidden="true"></div>
     <div>
       <span class="section-num">03</span>
-      <h2>Arxitektura — Modulli Yondashuv</h2>
+      <h2 data-i18n="s03.title">Arxitektura — Modulli Yondashuv</h2>
     </div>
   </div>
   <div class="section-body">
-    <h3 class="reveal">Monolit vs Modulli</h3>
+    <h3 class="reveal" data-i18n="s03.h3a">Monolit vs Modulli</h3>
     <div class="comparison reveal">
       <div class="comparison-col comparison-bad">
-        <h4>Monolit yondashuv</h4>
+        <h4 data-i18n="s03.bad_h4">Monolit yondashuv</h4>
         <ul>
-          <li>Bitta katta fayl, 2000+ qator</li>
-          <li>Claude kontekstga sig'maydi</li>
-          <li>Xatolikni topish qiyin</li>
-          <li>Qayta ishlatish imkonsiz</li>
+          <li data-i18n="s03.bad1">Bitta katta fayl, 2000+ qator</li>
+          <li data-i18n="s03.bad2">Claude kontekstga sig'maydi</li>
+          <li data-i18n="s03.bad3">Xatolikni topish qiyin</li>
+          <li data-i18n="s03.bad4">Qayta ishlatish imkonsiz</li>
         </ul>
       </div>
       <div class="comparison-col comparison-good">
-        <h4>Modulli yondashuv</h4>
+        <h4 data-i18n="s03.good_h4">Modulli yondashuv</h4>
         <ul>
-          <li>Har fayl 200 qatordan kam</li>
-          <li>Har sessiyada 1-2 modul</li>
-          <li>Xatolik izolyatsiya qilingan</li>
-          <li>Qayta ishlatish oson</li>
+          <li data-i18n="s03.good1">Har fayl 200 qatordan kam</li>
+          <li data-i18n="s03.good2">Har sessiyada 1-2 modul</li>
+          <li data-i18n="s03.good3">Xatolik izolyatsiya qilingan</li>
+          <li data-i18n="s03.good4">Qayta ishlatish oson</li>
         </ul>
       </div>
     </div>
-    <h3 class="reveal">Papka tuzilmasi</h3>
+    <h3 class="reveal" data-i18n="s03.h3b">Papka tuzilmasi</h3>
     <div class="code-block reveal">
       <div class="code-header">
         <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
@@ -1188,8 +1228,8 @@ details .details-content{padding:24px}
       </div>
     </div>
     <div class="callout reveal">
-      <div class="callout-title">200 qator qoidasi</div>
-      <p style="margin:0;font-size:15px;">Har bir fayl 200 qatordan oshmasligi kerak. Bu Claude ning kontekstini tejaydi va har bir sessiyada aniq bir modulga fokuslanish imkonini beradi. Agar fayl 200 qatordan oshsa — uni yana maydaroq modullarga bo'ling.</p>
+      <div class="callout-title" data-i18n="s03.callout1">200 qator qoidasi</div>
+      <p style="margin:0;font-size:15px;" data-i18n="s03.callout1p">Har bir fayl 200 qatordan oshmasligi kerak. Bu Claude ning kontekstini tejaydi va har bir sessiyada aniq bir modulga fokuslanish imkonini beradi. Agar fayl 200 qatordan oshsa — uni yana maydaroq modullarga bo'ling.</p>
     </div>
   </div>
 </section>
@@ -1200,24 +1240,24 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-robot" aria-hidden="true"></div>
     <div>
       <span class="section-num">04</span>
-      <h2>AGENTS.md va CLAUDE.md</h2>
+      <h2 data-i18n="s04.title">AGENTS.md va CLAUDE.md</h2>
     </div>
   </div>
   <div class="section-body">
-    <p class="reveal">AGENTS.md va CLAUDE.md — Claude uchun "ko'rsatma" fayllar. Ular Claude ga loyihangizda qanday ishlash kerakligini tushuntiradi.</p>
-    <h3 class="reveal">Farqlar</h3>
+    <p class="reveal" data-i18n="s04.p1">AGENTS.md va CLAUDE.md — Claude uchun "ko'rsatma" fayllar. Ular Claude ga loyihangizda qanday ishlash kerakligini tushuntiradi.</p>
+    <h3 class="reveal" data-i18n="s04.h3a">Farqlar</h3>
     <div class="table-wrapper reveal">
       <table>
-        <thead><tr><th>Xususiyat</th><th>CLAUDE.md</th><th>AGENTS.md</th></tr></thead>
+        <thead><tr><th data-i18n="s04.th1">Xususiyat</th><th>CLAUDE.md</th><th>AGENTS.md</th></tr></thead>
         <tbody>
-          <tr><td>Maqsad</td><td>Umumiy loyiha qoidalari</td><td>Har bir agent uchun alohida ko'rsatmalar</td></tr>
-          <tr><td>Joylashuvi</td><td>Loyiha ildiz papkasida</td><td>docs/ papkasida yoki ildizda</td></tr>
-          <tr><td>Tarkibi</td><td>Kod uslubi, til, taqiqlar</td><td>Rol, imkoniyatlar, cheklovlar</td></tr>
-          <tr><td>Qachon o'qiladi</td><td>Har sessiya boshida avtomatik</td><td>Kontekst sifatida berilganda</td></tr>
+          <tr><td data-i18n="s04.r1c1">Maqsad</td><td data-i18n="s04.r1c2">Umumiy loyiha qoidalari</td><td data-i18n="s04.r1c3">Har bir agent uchun alohida ko'rsatmalar</td></tr>
+          <tr><td data-i18n="s04.r2c1">Joylashuvi</td><td data-i18n="s04.r2c2">Loyiha ildiz papkasida</td><td data-i18n="s04.r2c3">docs/ papkasida yoki ildizda</td></tr>
+          <tr><td data-i18n="s04.r3c1">Tarkibi</td><td data-i18n="s04.r3c2">Kod uslubi, til, taqiqlar</td><td data-i18n="s04.r3c3">Rol, imkoniyatlar, cheklovlar</td></tr>
+          <tr><td data-i18n="s04.r4c1">Qachon o'qiladi</td><td data-i18n="s04.r4c2">Har sessiya boshida avtomatik</td><td data-i18n="s04.r4c3">Kontekst sifatida berilganda</td></tr>
         </tbody>
       </table>
     </div>
-    <h3 class="reveal">AGENTS.md namunasi</h3>
+    <h3 class="reveal" data-i18n="s04.h3b">AGENTS.md namunasi</h3>
     <div class="code-block reveal">
       <div class="code-header">
         <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
@@ -1253,13 +1293,13 @@ details .details-content{padding:24px}
       </div>
     </div>
     <div class="callout success reveal">
-      <div class="callout-title">AGENTS.md yozish sirlari</div>
+      <div class="callout-title" data-i18n="s04.callout1">AGENTS.md yozish sirlari</div>
       <ol class="numbered-list">
-        <li>Aniq rol bering — "Sen tajribali backend dasturchi" kabi</li>
-        <li>Taqiqlarni yozing — nima qilmasligi kerak</li>
-        <li>Fayl tuzilmasi ko'rsating — qayerga qanday fayl yaratish kerak</li>
-        <li>Kod uslubini belgilang — naming convention, lint qoidalari</li>
-        <li>Xotira mexanizmini ko'rsating — PROGRESS.md bilan ishlash tartibi</li>
+        <li data-i18n="s04.tip1">Aniq rol bering — "Sen tajribali backend dasturchi" kabi</li>
+        <li data-i18n="s04.tip2">Taqiqlarni yozing — nima qilmasligi kerak</li>
+        <li data-i18n="s04.tip3">Fayl tuzilmasi ko'rsating — qayerga qanday fayl yaratish kerak</li>
+        <li data-i18n="s04.tip4">Kod uslubini belgilang — naming convention, lint qoidalari</li>
+        <li data-i18n="s04.tip5">Xotira mexanizmini ko'rsating — PROGRESS.md bilan ishlash tartibi</li>
       </ol>
     </div>
   </div>
@@ -1271,28 +1311,28 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-calendar" aria-hidden="true"></div>
     <div>
       <span class="section-num">05</span>
-      <h2>Sessiya Strategiyasi</h2>
+      <h2 data-i18n="s05.title">Sessiya Strategiyasi</h2>
     </div>
   </div>
   <div class="section-body">
     <div class="callout reveal">
-      <div class="callout-title">Asosiy qoida: 1 sessiya = 1-2 modul</div>
-      <p style="margin:0;font-size:15px;">Har bir sessiyada faqat 1-2 ta modulni yarating yoki yangilang. Bu Claude ning kontekst oynasidan samarali foydalanishni ta'minlaydi va token isrofini kamaytiradi.</p>
+      <div class="callout-title" data-i18n="s05.callout1">Asosiy qoida: 1 sessiya = 1-2 modul</div>
+      <p style="margin:0;font-size:15px;" data-i18n="s05.callout1p">Har bir sessiyada faqat 1-2 ta modulni yarating yoki yangilang. Bu Claude ning kontekst oynasidan samarali foydalanishni ta'minlaydi va token isrofini kamaytiradi.</p>
     </div>
-    <h3 class="reveal">10 sessiya rejasi — EduPlatform</h3>
+    <h3 class="reveal" data-i18n="s05.h3a">10 sessiya rejasi — EduPlatform</h3>
     <div class="timeline reveal">
-      <div class="timeline-item"><div class="timeline-dot done">1</div><div class="timeline-title">Sessiya 1: Loyiha asosi</div><div class="timeline-desc">package.json, tsconfig, database setup, shared utilities</div></div>
-      <div class="timeline-item"><div class="timeline-dot done">2</div><div class="timeline-title">Sessiya 2: Auth moduli</div><div class="timeline-desc">Register, login, JWT, middleware</div></div>
-      <div class="timeline-item"><div class="timeline-dot done">3</div><div class="timeline-title">Sessiya 3: User profil</div><div class="timeline-desc">Profil CRUD, avatar upload, settings</div></div>
-      <div class="timeline-item"><div class="timeline-dot current">4</div><div class="timeline-title">Sessiya 4: Kurslar CRUD</div><div class="timeline-desc">Kurslarni yaratish, o'qish, yangilash, o'chirish</div></div>
-      <div class="timeline-item"><div class="timeline-dot pending">5</div><div class="timeline-title">Sessiya 5: Darslar moduli</div><div class="timeline-desc">Darslar CRUD, video integration</div></div>
-      <div class="timeline-item"><div class="timeline-dot pending">6</div><div class="timeline-title">Sessiya 6: Progress tracking</div><div class="timeline-desc">Foydalanuvchi progressi, statistika</div></div>
-      <div class="timeline-item"><div class="timeline-dot pending">7</div><div class="timeline-title">Sessiya 7: Admin panel</div><div class="timeline-desc">Boshqaruv paneli, dashboard</div></div>
-      <div class="timeline-item"><div class="timeline-dot pending">8</div><div class="timeline-title">Sessiya 8: Frontend sahifalar</div><div class="timeline-desc">Landing, kurslar ro'yxati, kurs sahifasi</div></div>
-      <div class="timeline-item"><div class="timeline-dot pending">9</div><div class="timeline-title">Sessiya 9: UI polish</div><div class="timeline-desc">Responsive dizayn, animatsiyalar, UX</div></div>
-      <div class="timeline-item"><div class="timeline-dot pending">10</div><div class="timeline-title">Sessiya 10: Deploy</div><div class="timeline-desc">CI/CD, deploy, monitoring, testing</div></div>
+      <div class="timeline-item"><div class="timeline-dot done">1</div><div class="timeline-title" data-i18n="s05.tl1t">Sessiya 1: Loyiha asosi</div><div class="timeline-desc" data-i18n="s05.tl1d">package.json, tsconfig, database setup, shared utilities</div></div>
+      <div class="timeline-item"><div class="timeline-dot done">2</div><div class="timeline-title" data-i18n="s05.tl2t">Sessiya 2: Auth moduli</div><div class="timeline-desc" data-i18n="s05.tl2d">Register, login, JWT, middleware</div></div>
+      <div class="timeline-item"><div class="timeline-dot done">3</div><div class="timeline-title" data-i18n="s05.tl3t">Sessiya 3: User profil</div><div class="timeline-desc" data-i18n="s05.tl3d">Profil CRUD, avatar upload, settings</div></div>
+      <div class="timeline-item"><div class="timeline-dot current">4</div><div class="timeline-title" data-i18n="s05.tl4t">Sessiya 4: Kurslar CRUD</div><div class="timeline-desc" data-i18n="s05.tl4d">Kurslarni yaratish, o'qish, yangilash, o'chirish</div></div>
+      <div class="timeline-item"><div class="timeline-dot pending">5</div><div class="timeline-title" data-i18n="s05.tl5t">Sessiya 5: Darslar moduli</div><div class="timeline-desc" data-i18n="s05.tl5d">Darslar CRUD, video integration</div></div>
+      <div class="timeline-item"><div class="timeline-dot pending">6</div><div class="timeline-title" data-i18n="s05.tl6t">Sessiya 6: Progress tracking</div><div class="timeline-desc" data-i18n="s05.tl6d">Foydalanuvchi progressi, statistika</div></div>
+      <div class="timeline-item"><div class="timeline-dot pending">7</div><div class="timeline-title" data-i18n="s05.tl7t">Sessiya 7: Admin panel</div><div class="timeline-desc" data-i18n="s05.tl7d">Boshqaruv paneli, dashboard</div></div>
+      <div class="timeline-item"><div class="timeline-dot pending">8</div><div class="timeline-title" data-i18n="s05.tl8t">Sessiya 8: Frontend sahifalar</div><div class="timeline-desc" data-i18n="s05.tl8d">Landing, kurslar ro'yxati, kurs sahifasi</div></div>
+      <div class="timeline-item"><div class="timeline-dot pending">9</div><div class="timeline-title" data-i18n="s05.tl9t">Sessiya 9: UI polish</div><div class="timeline-desc" data-i18n="s05.tl9d">Responsive dizayn, animatsiyalar, UX</div></div>
+      <div class="timeline-item"><div class="timeline-dot pending">10</div><div class="timeline-title" data-i18n="s05.tl10t">Sessiya 10: Deploy</div><div class="timeline-desc" data-i18n="s05.tl10d">CI/CD, deploy, monitoring, testing</div></div>
     </div>
-    <h3 class="reveal">Sessiya boshlash prompti</h3>
+    <h3 class="reveal" data-i18n="s05.h3b">Sessiya boshlash prompti</h3>
     <details class="reveal">
       <summary>Namuna prompt — Sessiya boshida</summary>
       <div class="details-content">
@@ -1337,8 +1377,8 @@ details .details-content{padding:24px}
       </div>
     </details>
     <div class="info-box reveal">
-      <div class="info-box-title">Token tejash hisob-kitobi</div>
-      <p style="margin:0;font-size:15px;">Oddiy yondashuv: ~50K token/sessiya (takroriy kontekst bilan). Modulli yondashuv: ~15-20K token/sessiya. Tejash: <strong>60-70%</strong> kam token sarflanadi!</p>
+      <div class="info-box-title" data-i18n="s05.info1t">Token tejash hisob-kitobi</div>
+      <p style="margin:0;font-size:15px;" data-i18n-html="s05.info1">Oddiy yondashuv: ~50K token/sessiya (takroriy kontekst bilan). Modulli yondashuv: ~15-20K token/sessiya. Tejash: <strong>60-70%</strong> kam token sarflanadi!</p>
     </div>
   </div>
 </section>
@@ -1349,12 +1389,12 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-progress" aria-hidden="true"><span class="bar-fill"></span></div>
     <div>
       <span class="section-num">06</span>
-      <h2>PROGRESS.md — Xotira Tizimi</h2>
+      <h2 data-i18n="s06.title">PROGRESS.md — Xotira Tizimi</h2>
     </div>
   </div>
   <div class="section-body">
-    <p class="reveal">Claude har yangi sessiyada hamma narsani unutadi. PROGRESS.md — bu sessiyalar orasida ma'lumot saqlash usuli. Har sessiya oxirida yangilanadi, har sessiya boshida o'qiladi.</p>
-    <h3 class="reveal">PROGRESS.md namunasi</h3>
+    <p class="reveal" data-i18n="s06.p1">Claude har yangi sessiyada hamma narsani unutadi. PROGRESS.md — bu sessiyalar orasida ma'lumot saqlash usuli. Har sessiya oxirida yangilanadi, har sessiya boshida o'qiladi.</p>
+    <h3 class="reveal" data-i18n="s06.h3a">PROGRESS.md namunasi</h3>
     <div class="code-block reveal">
       <div class="code-header"><div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><span class="code-lang">Markdown</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
       <div class="code-body">
@@ -1384,26 +1424,26 @@ details .details-content{padding:24px}
 <span class="line">- Upload uchun S3 konfiguratsiya kerak</span>
       </div>
     </div>
-    <h3 class="reveal">Xotira usullari taqqoslash</h3>
+    <h3 class="reveal" data-i18n="s06.h3b">Xotira usullari taqqoslash</h3>
     <div class="table-wrapper reveal">
       <table>
-        <thead><tr><th>Usul</th><th>Qulaylik</th><th>Kamchilik</th><th>Tavsiya</th></tr></thead>
+        <thead><tr><th data-i18n="s06.th1">Usul</th><th data-i18n="s06.th2">Qulaylik</th><th data-i18n="s06.th3">Kamchilik</th><th data-i18n="s06.th4">Tavsiya</th></tr></thead>
         <tbody>
-          <tr><td>PROGRESS.md</td><td>Oddiy, tushunarli</td><td>Qo'lda yangilash kerak</td><td>Kichik-o'rta loyihalar</td></tr>
-          <tr><td>Claude Memory (Beads)</td><td>Avtomatik</td><td>Cheklangan hajm</td><td>Kichik loyihalar</td></tr>
-          <tr><td>Tasks / TODO</td><td>Tezkor</td><td>Batafsil emas</td><td>Kundalik vazifalar</td></tr>
-          <tr><td>Git commits</td><td>Tarixiy</td><td>O'qish qiyin</td><td>Qo'shimcha sifatida</td></tr>
+          <tr><td>PROGRESS.md</td><td data-i18n="s06.r1c2">Oddiy, tushunarli</td><td data-i18n="s06.r1c3">Qo'lda yangilash kerak</td><td data-i18n="s06.r1c4">Kichik-o'rta loyihalar</td></tr>
+          <tr><td data-i18n="s06.r2c1">Claude Memory (Beads)</td><td data-i18n="s06.r2c2">Avtomatik</td><td data-i18n="s06.r2c3">Cheklangan hajm</td><td data-i18n="s06.r2c4">Kichik loyihalar</td></tr>
+          <tr><td>Tasks / TODO</td><td data-i18n="s06.r3c2">Tezkor</td><td data-i18n="s06.r3c3">Batafsil emas</td><td data-i18n="s06.r3c4">Kundalik vazifalar</td></tr>
+          <tr><td>Git commits</td><td data-i18n="s06.r4c2">Tarixiy</td><td data-i18n="s06.r4c3">O'qish qiyin</td><td data-i18n="s06.r4c4">Qo'shimcha sifatida</td></tr>
         </tbody>
       </table>
     </div>
     <div class="callout success reveal">
-      <div class="callout-title">5 ta best practice</div>
+      <div class="callout-title" data-i18n="s06.callout1">5 ta best practice</div>
       <ol class="numbered-list">
-        <li>Har sessiya oxirida PROGRESS.md ni yangilashni UNUTMANG</li>
-        <li>Faqat kerakli ma'lumotni yozing — ortiqchasi token sarflaydi</li>
-        <li>Muammolarni alohida bo'limda yozing — keyingi sessiyada hal qilish oson</li>
-        <li>Foiz ko'rsating (30%, 50%) — umumiy holatni tushunish oson</li>
-        <li>Fayl nomlari va yo'llarini aniq yozing — Claude tezroq topadi</li>
+        <li data-i18n="s06.bp1">Har sessiya oxirida PROGRESS.md ni yangilashni UNUTMANG</li>
+        <li data-i18n="s06.bp2">Faqat kerakli ma'lumotni yozing — ortiqchasi token sarflaydi</li>
+        <li data-i18n="s06.bp3">Muammolarni alohida bo'limda yozing — keyingi sessiyada hal qilish oson</li>
+        <li data-i18n="s06.bp4">Foiz ko'rsating (30%, 50%) — umumiy holatni tushunish oson</li>
+        <li data-i18n="s06.bp5">Fayl nomlari va yo'llarini aniq yozing — Claude tezroq topadi</li>
       </ol>
     </div>
   </div>
@@ -1415,12 +1455,12 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-laptop" aria-hidden="true"></div>
     <div>
       <span class="section-num">07</span>
-      <h2>Amaliy Namuna — 3 Sessiya</h2>
+      <h2 data-i18n="s07.title">Amaliy Namuna — 3 Sessiya</h2>
     </div>
   </div>
   <div class="section-body">
     <div class="session-card reveal">
-      <h4>Sessiya #1: Loyiha asosi</h4>
+      <h4 data-i18n="s07.ses1">Sessiya #1: Loyiha asosi</h4>
       <details>
         <summary>Boshlash prompti</summary>
         <div class="details-content">
@@ -1441,10 +1481,10 @@ details .details-content{padding:24px}
           </div>
         </div>
       </details>
-      <ul class="checklist" style="margin-top:16px"><li>package.json yaratildi</li><li>TypeScript konfiguratsiya tayyor</li><li>Database connection ishlaydi</li><li>Error handling middleware tayyor</li><li>PROGRESS.md yangilandi</li></ul>
+      <ul class="checklist" style="margin-top:16px"><li data-i18n="s07.s1c1">package.json yaratildi</li><li data-i18n="s07.s1c2">TypeScript konfiguratsiya tayyor</li><li data-i18n="s07.s1c3">Database connection ishlaydi</li><li data-i18n="s07.s1c4">Error handling middleware tayyor</li><li data-i18n="s07.s1c5">PROGRESS.md yangilandi</li></ul>
     </div>
     <div class="session-card reveal">
-      <h4>Sessiya #2: Auth moduli</h4>
+      <h4 data-i18n="s07.ses2">Sessiya #2: Auth moduli</h4>
       <details>
         <summary>Boshlash prompti</summary>
         <div class="details-content">
@@ -1462,10 +1502,10 @@ details .details-content{padding:24px}
           </div>
         </div>
       </details>
-      <ul class="checklist" style="margin-top:16px"><li>Register endpoint ishlaydi</li><li>Login va JWT token ishlaydi</li><li>Auth middleware tayyor</li><li>Testlar yashil</li><li>PROGRESS.md yangilandi</li></ul>
+      <ul class="checklist" style="margin-top:16px"><li data-i18n="s07.s2c1">Register endpoint ishlaydi</li><li data-i18n="s07.s2c2">Login va JWT token ishlaydi</li><li data-i18n="s07.s2c3">Auth middleware tayyor</li><li data-i18n="s07.s2c4">Testlar yashil</li><li data-i18n="s07.s2c5">PROGRESS.md yangilandi</li></ul>
     </div>
     <div class="session-card reveal">
-      <h4>Sessiya #3: Kurslar CRUD</h4>
+      <h4 data-i18n="s07.ses3">Sessiya #3: Kurslar CRUD</h4>
       <details>
         <summary>Boshlash prompti</summary>
         <div class="details-content">
@@ -1483,11 +1523,11 @@ details .details-content{padding:24px}
           </div>
         </div>
       </details>
-      <ul class="checklist" style="margin-top:16px"><li>GET /api/courses ishlaydi</li><li>POST /api/courses (faqat admin)</li><li>PUT va DELETE endpointlari</li><li>Pagination qo'shildi</li><li>PROGRESS.md yangilandi</li></ul>
+      <ul class="checklist" style="margin-top:16px"><li data-i18n="s07.s3c1">GET /api/courses ishlaydi</li><li data-i18n="s07.s3c2">POST /api/courses (faqat admin)</li><li data-i18n="s07.s3c3">PUT va DELETE endpointlari</li><li data-i18n="s07.s3c4">Pagination qo'shildi</li><li data-i18n="s07.s3c5">PROGRESS.md yangilandi</li></ul>
     </div>
     <div class="callout warning reveal">
-      <div class="callout-title">Muhim eslatma</div>
-      <p style="margin:0;font-size:15px;">Har sessiyadan keyin PROGRESS.md ni yangilashni unutmang! Bu keyingi sessiyada kontekstni tiklash uchun zarur.</p>
+      <div class="callout-title" data-i18n="s07.callout1">Muhim eslatma</div>
+      <p style="margin:0;font-size:15px;" data-i18n="s07.callout1p">Har sessiyadan keyin PROGRESS.md ni yangilashni unutmang! Bu keyingi sessiyada kontekstni tiklash uchun zarur.</p>
     </div>
   </div>
 </section>
@@ -1498,36 +1538,36 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-coin" aria-hidden="true"></div>
     <div>
       <span class="section-num">08</span>
-      <h2>Token Optimallashtirish</h2>
+      <h2 data-i18n="s08.title">Token Optimallashtirish</h2>
     </div>
   </div>
   <div class="section-body">
-    <h3 class="reveal">Token sarfi taqqoslash</h3>
+    <h3 class="reveal" data-i18n="s08.h3a">Token sarfi taqqoslash</h3>
     <div class="table-wrapper reveal">
       <table>
-        <thead><tr><th>Amal</th><th>Oddiy usul</th><th>Optimal usul</th><th>Tejash</th></tr></thead>
+        <thead><tr><th data-i18n="s08.th1">Amal</th><th data-i18n="s08.th2">Oddiy usul</th><th data-i18n="s08.th3">Optimal usul</th><th data-i18n="s08.th4">Tejash</th></tr></thead>
         <tbody>
-          <tr><td>Kontekst berish</td><td>~15K token</td><td>~3K token</td><td>80%</td></tr>
-          <tr><td>Modul yaratish</td><td>~20K token</td><td>~8K token</td><td>60%</td></tr>
-          <tr><td>Xato tuzatish</td><td>~10K token</td><td>~3K token</td><td>70%</td></tr>
-          <tr><td>Refaktoring</td><td>~25K token</td><td>~10K token</td><td>60%</td></tr>
-          <tr><td>Test yozish</td><td>~12K token</td><td>~5K token</td><td>58%</td></tr>
-          <tr><td><strong>Sessiya jami</strong></td><td><strong>~50K token</strong></td><td><strong>~18K token</strong></td><td><strong>64%</strong></td></tr>
+          <tr><td data-i18n="s08.r1c1">Kontekst berish</td><td>~15K token</td><td>~3K token</td><td>80%</td></tr>
+          <tr><td data-i18n="s08.r2c1">Modul yaratish</td><td>~20K token</td><td>~8K token</td><td>60%</td></tr>
+          <tr><td data-i18n="s08.r3c1">Xato tuzatish</td><td>~10K token</td><td>~3K token</td><td>70%</td></tr>
+          <tr><td data-i18n="s08.r4c1">Refaktoring</td><td>~25K token</td><td>~10K token</td><td>60%</td></tr>
+          <tr><td data-i18n="s08.r5c1">Test yozish</td><td>~12K token</td><td>~5K token</td><td>58%</td></tr>
+          <tr><td><strong data-i18n="s08.r6c1">Sessiya jami</strong></td><td><strong>~50K token</strong></td><td><strong>~18K token</strong></td><td><strong>64%</strong></td></tr>
         </tbody>
       </table>
     </div>
-    <h3 class="reveal">10 ta oltin qoida</h3>
+    <h3 class="reveal" data-i18n="s08.h3b">10 ta oltin qoida</h3>
     <div class="step-cards">
-      <div class="step-card reveal"><div class="step-num">01</div><div class="step-title">Aniq prompt yozing</div><div class="step-desc">Umumiy so'rov o'rniga aniq fayl nomlari va vazifalarni ko'rsating.</div></div>
-      <div class="step-card reveal"><div class="step-num">02</div><div class="step-title">AGENTS.md ishlating</div><div class="step-desc">Har sessiyada qoidalarni takrorlamasdan, faylga yozib qo'ying.</div></div>
-      <div class="step-card reveal"><div class="step-num">03</div><div class="step-title">1 sessiya = 1 modul</div><div class="step-desc">Kichik, fokusli sessiyalar samaraliroq ishlaydi.</div></div>
-      <div class="step-card reveal"><div class="step-num">04</div><div class="step-title">200 qator limiti</div><div class="step-desc">Fayllarni kichik saqlang — kontekst tejaldi.</div></div>
-      <div class="step-card reveal"><div class="step-num">05</div><div class="step-title">PROGRESS.md yuritish</div><div class="step-desc">Sessiyalar orasida xotira sifatida foydalaning.</div></div>
-      <div class="step-card reveal"><div class="step-num">06</div><div class="step-title">Takrorlashdan saqlaning</div><div class="step-desc">Bir xil narsani qayta so'ramaslik uchun natijalarni saqlang.</div></div>
-      <div class="step-card reveal"><div class="step-num">07</div><div class="step-title">Batch operatsiyalar</div><div class="step-desc">Bir nechta kichik so'rov o'rniga bitta batafsil so'rov yuboring.</div></div>
-      <div class="step-card reveal"><div class="step-num">08</div><div class="step-title">Ortiqcha kodni bermang</div><div class="step-desc">Faqat kerakli fayllarni kontekstga qo'shing.</div></div>
-      <div class="step-card reveal"><div class="step-num">09</div><div class="step-title">Namuna bering</div><div class="step-desc">Ko'p tushuntirish o'rniga bitta namuna bering — Claude tezroq tushunadi.</div></div>
-      <div class="step-card reveal"><div class="step-num">10</div><div class="step-title">Sessiyani to'g'ri tugatish</div><div class="step-desc">Har sessiya oxirida xotirani yangilang va natijani tekshiring.</div></div>
+      <div class="step-card reveal"><div class="step-num">01</div><div class="step-title" data-i18n="s08.st1t">Aniq prompt yozing</div><div class="step-desc" data-i18n="s08.st1d">Umumiy so'rov o'rniga aniq fayl nomlari va vazifalarni ko'rsating.</div></div>
+      <div class="step-card reveal"><div class="step-num">02</div><div class="step-title" data-i18n="s08.st2t">AGENTS.md ishlating</div><div class="step-desc" data-i18n="s08.st2d">Har sessiyada qoidalarni takrorlamasdan, faylga yozib qo'ying.</div></div>
+      <div class="step-card reveal"><div class="step-num">03</div><div class="step-title" data-i18n="s08.st3t">1 sessiya = 1 modul</div><div class="step-desc" data-i18n="s08.st3d">Kichik, fokusli sessiyalar samaraliroq ishlaydi.</div></div>
+      <div class="step-card reveal"><div class="step-num">04</div><div class="step-title" data-i18n="s08.st4t">200 qator limiti</div><div class="step-desc" data-i18n="s08.st4d">Fayllarni kichik saqlang — kontekst tejaldi.</div></div>
+      <div class="step-card reveal"><div class="step-num">05</div><div class="step-title" data-i18n="s08.st5t">PROGRESS.md yuritish</div><div class="step-desc" data-i18n="s08.st5d">Sessiyalar orasida xotira sifatida foydalaning.</div></div>
+      <div class="step-card reveal"><div class="step-num">06</div><div class="step-title" data-i18n="s08.st6t">Takrorlashdan saqlaning</div><div class="step-desc" data-i18n="s08.st6d">Bir xil narsani qayta so'ramaslik uchun natijalarni saqlang.</div></div>
+      <div class="step-card reveal"><div class="step-num">07</div><div class="step-title" data-i18n="s08.st7t">Batch operatsiyalar</div><div class="step-desc" data-i18n="s08.st7d">Bir nechta kichik so'rov o'rniga bitta batafsil so'rov yuboring.</div></div>
+      <div class="step-card reveal"><div class="step-num">08</div><div class="step-title" data-i18n="s08.st8t">Ortiqcha kodni bermang</div><div class="step-desc" data-i18n="s08.st8d">Faqat kerakli fayllarni kontekstga qo'shing.</div></div>
+      <div class="step-card reveal"><div class="step-num">09</div><div class="step-title" data-i18n="s08.st9t">Namuna bering</div><div class="step-desc" data-i18n="s08.st9d">Ko'p tushuntirish o'rniga bitta namuna bering — Claude tezroq tushunadi.</div></div>
+      <div class="step-card reveal"><div class="step-num">10</div><div class="step-title" data-i18n="s08.st10t">Sessiyani to'g'ri tugatish</div><div class="step-desc" data-i18n="s08.st10d">Har sessiya oxirida xotirani yangilang va natijani tekshiring.</div></div>
     </div>
   </div>
 </section>
@@ -1538,16 +1578,16 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-warning" aria-hidden="true"></div>
     <div>
       <span class="section-num">09</span>
-      <h2>Tez-tez Uchraydigan Xatolar</h2>
+      <h2 data-i18n="s09.title">Tez-tez Uchraydigan Xatolar</h2>
     </div>
   </div>
   <div class="section-body">
-    <div class="error-card reveal"><div class="error-name">1. Kontekstni haddan tashqari to'ldirish</div><div class="error-problem">Butun loyiha kodini bir sessiyaga joylashtirish — 200K token cheklovi tufayli Claude ishlamay qoladi.</div><div class="error-solution"><strong>Yechim:</strong> Faqat joriy modul fayllarini bering. AGENTS.md va PROGRESS.md kontekst uchun yetarli.</div></div>
-    <div class="error-card reveal"><div class="error-name">2. PROGRESS.md yangilamaslik</div><div class="error-problem">Keyingi sessiyada Claude hamma narsani unutadi va qaytadan boshdan ishlaydi.</div><div class="error-solution"><strong>Yechim:</strong> Har sessiya oxirida PROGRESS.md yangilashni odat qiling. Prompt oxiriga eslatma qo'shing.</div></div>
-    <div class="error-card reveal"><div class="error-name">3. Juda umumiy prompt berish</div><div class="error-problem">"Menga web app yasa" kabi umumiy so'rov — natija sifatsiz bo'ladi.</div><div class="error-solution"><strong>Yechim:</strong> Aniq fayl nomlari, endpoint lar va texnologiyalarni ko'rsating.</div></div>
-    <div class="error-card reveal"><div class="error-name">4. Katta fayllar yaratish</div><div class="error-problem">500+ qatorli fayllar — Claude keyingi sessiyada to'liq o'qiy olmaydi.</div><div class="error-solution"><strong>Yechim:</strong> 200 qator limitiga rioya qiling. Katta fayllarni modullarga bo'ling.</div></div>
-    <div class="error-card reveal"><div class="error-name">5. Sessiyada juda ko'p ish</div><div class="error-problem">Bir sessiyada 5+ modul yaratish — sifat pasayadi, xatolar ko'payadi.</div><div class="error-solution"><strong>Yechim:</strong> 1 sessiya = 1-2 modul. Sifat muhimroq tezlikdan.</div></div>
-    <div class="error-card reveal"><div class="error-name">6. Testlarni keyinga qoldirish</div><div class="error-problem">Barcha modullar tayyor bo'lgandan keyin test yozish — xatolar ko'p bo'ladi.</div><div class="error-solution"><strong>Yechim:</strong> Har modul bilan birga testini ham yozing. Sessiya oxirida testlar yashil bo'lishi kerak.</div></div>
+    <div class="error-card reveal"><div class="error-name" data-i18n="s09.e1n">1. Kontekstni haddan tashqari to'ldirish</div><div class="error-problem" data-i18n="s09.e1p">Butun loyiha kodini bir sessiyaga joylashtirish — 200K token cheklovi tufayli Claude ishlamay qoladi.</div><div class="error-solution" data-i18n-html="s09.e1s"><strong>Yechim:</strong> Faqat joriy modul fayllarini bering. AGENTS.md va PROGRESS.md kontekst uchun yetarli.</div></div>
+    <div class="error-card reveal"><div class="error-name" data-i18n="s09.e2n">2. PROGRESS.md yangilamaslik</div><div class="error-problem" data-i18n="s09.e2p">Keyingi sessiyada Claude hamma narsani unutadi va qaytadan boshdan ishlaydi.</div><div class="error-solution" data-i18n-html="s09.e2s"><strong>Yechim:</strong> Har sessiya oxirida PROGRESS.md yangilashni odat qiling. Prompt oxiriga eslatma qo'shing.</div></div>
+    <div class="error-card reveal"><div class="error-name" data-i18n="s09.e3n">3. Juda umumiy prompt berish</div><div class="error-problem" data-i18n="s09.e3p">"Menga web app yasa" kabi umumiy so'rov — natija sifatsiz bo'ladi.</div><div class="error-solution" data-i18n-html="s09.e3s"><strong>Yechim:</strong> Aniq fayl nomlari, endpoint lar va texnologiyalarni ko'rsating.</div></div>
+    <div class="error-card reveal"><div class="error-name" data-i18n="s09.e4n">4. Katta fayllar yaratish</div><div class="error-problem" data-i18n="s09.e4p">500+ qatorli fayllar — Claude keyingi sessiyada to'liq o'qiy olmaydi.</div><div class="error-solution" data-i18n-html="s09.e4s"><strong>Yechim:</strong> 200 qator limitiga rioya qiling. Katta fayllarni modullarga bo'ling.</div></div>
+    <div class="error-card reveal"><div class="error-name" data-i18n="s09.e5n">5. Sessiyada juda ko'p ish</div><div class="error-problem" data-i18n="s09.e5p">Bir sessiyada 5+ modul yaratish — sifat pasayadi, xatolar ko'payadi.</div><div class="error-solution" data-i18n-html="s09.e5s"><strong>Yechim:</strong> 1 sessiya = 1-2 modul. Sifat muhimroq tezlikdan.</div></div>
+    <div class="error-card reveal"><div class="error-name" data-i18n="s09.e6n">6. Testlarni keyinga qoldirish</div><div class="error-problem" data-i18n="s09.e6p">Barcha modullar tayyor bo'lgandan keyin test yozish — xatolar ko'p bo'ladi.</div><div class="error-solution" data-i18n-html="s09.e6s"><strong>Yechim:</strong> Har modul bilan birga testini ham yozing. Sessiya oxirida testlar yashil bo'lishi kerak.</div></div>
   </div>
 </section>
 
@@ -1557,34 +1597,34 @@ details .details-content{padding:24px}
     <div class="icon-3d icon-trophy" aria-hidden="true"></div>
     <div>
       <span class="section-num">10</span>
-      <h2>Xulosa</h2>
+      <h2 data-i18n="s10.title">Xulosa</h2>
     </div>
   </div>
   <div class="section-body">
-    <h3 class="reveal">Loyiha hayot aylanmasi</h3>
+    <h3 class="reveal" data-i18n="s10.h3a">Loyiha hayot aylanmasi</h3>
     <div class="lifecycle-grid reveal">
-      <div class="lifecycle-card"><div class="lifecycle-num">1</div><div class="lifecycle-title">Rejalashtirish</div><div class="lifecycle-desc">PRD.md yozish, talablarni aniqlash</div></div>
-      <div class="lifecycle-card"><div class="lifecycle-num">2</div><div class="lifecycle-title">Arxitektura</div><div class="lifecycle-desc">Papka tuzilmasi, modullar rejasi</div></div>
-      <div class="lifecycle-card"><div class="lifecycle-num">3</div><div class="lifecycle-title">Sozlash</div><div class="lifecycle-desc">AGENTS.md, PROGRESS.md yaratish</div></div>
-      <div class="lifecycle-card"><div class="lifecycle-num">4</div><div class="lifecycle-title">Qurish</div><div class="lifecycle-desc">Sessiyama-sessiya modullarni yaratish</div></div>
-      <div class="lifecycle-card"><div class="lifecycle-num">5</div><div class="lifecycle-title">Testlash</div><div class="lifecycle-desc">Har modul uchun testlar yozish</div></div>
-      <div class="lifecycle-card"><div class="lifecycle-num">6</div><div class="lifecycle-title">Deploy</div><div class="lifecycle-desc">CI/CD, monitoring, ishga tushirish</div></div>
+      <div class="lifecycle-card"><div class="lifecycle-num">1</div><div class="lifecycle-title" data-i18n="s10.lc1t">Rejalashtirish</div><div class="lifecycle-desc" data-i18n="s10.lc1d">PRD.md yozish, talablarni aniqlash</div></div>
+      <div class="lifecycle-card"><div class="lifecycle-num">2</div><div class="lifecycle-title" data-i18n="s10.lc2t">Arxitektura</div><div class="lifecycle-desc" data-i18n="s10.lc2d">Papka tuzilmasi, modullar rejasi</div></div>
+      <div class="lifecycle-card"><div class="lifecycle-num">3</div><div class="lifecycle-title" data-i18n="s10.lc3t">Sozlash</div><div class="lifecycle-desc" data-i18n="s10.lc3d">AGENTS.md, PROGRESS.md yaratish</div></div>
+      <div class="lifecycle-card"><div class="lifecycle-num">4</div><div class="lifecycle-title" data-i18n="s10.lc4t">Qurish</div><div class="lifecycle-desc" data-i18n="s10.lc4d">Sessiyama-sessiya modullarni yaratish</div></div>
+      <div class="lifecycle-card"><div class="lifecycle-num">5</div><div class="lifecycle-title" data-i18n="s10.lc5t">Testlash</div><div class="lifecycle-desc" data-i18n="s10.lc5d">Har modul uchun testlar yozish</div></div>
+      <div class="lifecycle-card"><div class="lifecycle-num">6</div><div class="lifecycle-title" data-i18n="s10.lc6t">Deploy</div><div class="lifecycle-desc" data-i18n="s10.lc6d">CI/CD, monitoring, ishga tushirish</div></div>
     </div>
-    <h3 class="reveal">Loyiha hajmiga qarab tavsiyalar</h3>
+    <h3 class="reveal" data-i18n="s10.h3b">Loyiha hajmiga qarab tavsiyalar</h3>
     <div class="table-wrapper reveal">
       <table>
-        <thead><tr><th>Loyiha hajmi</th><th>Sessiyalar soni</th><th>PROGRESS.md</th><th>AGENTS.md</th></tr></thead>
+        <thead><tr><th data-i18n="s10.th1">Loyiha hajmi</th><th data-i18n="s10.th2">Sessiyalar soni</th><th>PROGRESS.md</th><th>AGENTS.md</th></tr></thead>
         <tbody>
-          <tr><td>Kichik (1-3 kun)</td><td>2-4</td><td>Oddiy</td><td>Ixtiyoriy</td></tr>
-          <tr><td>O'rta (1-2 hafta)</td><td>5-10</td><td>Batafsil</td><td>Zarur</td></tr>
-          <tr><td>Katta (1+ oy)</td><td>15-30</td><td>Juda batafsil</td><td>Majburiy</td></tr>
-          <tr><td>Enterprise</td><td>50+</td><td>Avtomatlashtirilgan</td><td>Bir nechta agent</td></tr>
+          <tr><td data-i18n="s10.r1c1">Kichik (1-3 kun)</td><td>2-4</td><td data-i18n="s10.r1c3">Oddiy</td><td data-i18n="s10.r1c4">Ixtiyoriy</td></tr>
+          <tr><td data-i18n="s10.r2c1">O'rta (1-2 hafta)</td><td>5-10</td><td data-i18n="s10.r2c3">Batafsil</td><td data-i18n="s10.r2c4">Zarur</td></tr>
+          <tr><td data-i18n="s10.r3c1">Katta (1+ oy)</td><td>15-30</td><td data-i18n="s10.r3c3">Juda batafsil</td><td data-i18n="s10.r3c4">Majburiy</td></tr>
+          <tr><td>Enterprise</td><td>50+</td><td data-i18n="s10.r4c3">Avtomatlashtirilgan</td><td data-i18n="s10.r4c4">Bir nechta agent</td></tr>
         </tbody>
       </table>
     </div>
     <div class="cta-panel reveal">
-      <h3>Katta loyihalar — kichik qadamlar bilan quriladi</h3>
-      <p>Har bir sessiya — bitta qadam. Har bir modul — bitta g'isht. Sabrli va rejali ishlang, natija ajoyib bo'ladi.</p>
+      <h3 data-i18n="s10.cta_h3">Katta loyihalar — kichik qadamlar bilan quriladi</h3>
+      <p data-i18n="s10.cta_p">Har bir sessiya — bitta qadam. Har bir modul — bitta g'isht. Sabrli va rejali ishlang, natija ajoyib bo'ladi.</p>
     </div>
   </div>
 </section>
@@ -1594,7 +1634,7 @@ details .details-content{padding:24px}
 
 <!-- FOOTER -->
 <footer class="site-footer" role="contentinfo">
-  <p>2026 Claude AI Qo'llanma. Barcha huquqlar himoyalangan.</p>
+  <p data-i18n="footer.text">2026 Claude AI Qo'llanma. Barcha huquqlar himoyalangan.</p>
 </footer>
 
 </div><!-- end #root -->
@@ -1602,21 +1642,21 @@ details .details-content{padding:24px}
 <!-- PDF DOWNLOAD MODAL -->
 <div class="pdf-modal-overlay" id="pdfModal">
   <div class="pdf-modal">
-    <h3>PDF Yuklab Olish</h3>
-    <p>PDF uchun rejimni tanlang:</p>
+    <h3 data-i18n="pdf.title">PDF Yuklab Olish</h3>
+    <p data-i18n="pdf.desc">PDF uchun rejimni tanlang:</p>
     <div class="pdf-theme-options">
       <button class="pdf-theme-btn selected" id="pdfThemeLight" data-theme="light">
         <div class="theme-preview light-prev"></div>
-        <div class="theme-label">Yorug'</div>
+        <div class="theme-label" data-i18n="pdf.light">Yorug'</div>
       </button>
       <button class="pdf-theme-btn" id="pdfThemeDark" data-theme="dark">
         <div class="theme-preview dark-prev"></div>
-        <div class="theme-label">Qorong'u</div>
+        <div class="theme-label" data-i18n="pdf.dark">Qorong'u</div>
       </button>
     </div>
     <div class="pdf-modal-actions">
-      <button class="pdf-modal-cancel" id="pdfCancel">Bekor qilish</button>
-      <button class="pdf-modal-download" id="pdfDownload">Yuklab olish</button>
+      <button class="pdf-modal-cancel" id="pdfCancel" data-i18n="pdf.cancel">Bekor qilish</button>
+      <button class="pdf-modal-download" id="pdfDownload" data-i18n="pdf.download">Yuklab olish</button>
     </div>
   </div>
 </div>
@@ -2012,6 +2052,411 @@ src/modules/courses/ ichida:
 </div><!-- end #pdf-root -->
 
 <script>
+// ===== I18N DICTIONARY =====
+var I18N={
+uz:{
+"header.logo":"Claude AI Qo'llanma",
+"mobileToc.title":"Mundarija",
+"nav.01":"Kirish","nav.02":"PRD.md — Rejalashtirish","nav.03":"Arxitektura","nav.04":"AGENTS.md / CLAUDE.md","nav.05":"Sessiya strategiyasi","nav.06":"PROGRESS.md","nav.07":"Amaliy namuna","nav.08":"Token optimallashtirish","nav.09":"Xatolar","nav.10":"Xulosa",
+"hero.badge":"Qo'llanma 2026","hero.h1":"Claude AI bilan<br>Katta Loyihalarni Qurish","hero.subtitle":"Token tejash, sessiya boshqaruvi va modulli arxitektura — amaliy loyiha misolida o'rganamiz",
+"hero.m1":"daqiqa / sessiya","hero.m2":"token kontekst","hero.m3":"xotira sessiyalar orasida",
+"s01.title":"Kirish — Nima Uchun Maxsus Yondashuv Kerak?",
+"s01.p1":"Claude AI — bu kuchli vosita, lekin katta loyihalarda uni samarasiz ishlatish juda ko'p token sarflaydi va natija past bo'ladi. Bu qo'llanmada biz maxsus yondashuvni o'rganamiz: har bir sessiyani rejalashtirish, modulli arxitektura va xotirani boshqarish orqali samaradorlikni oshirish.",
+"s01.callout1":"3 ta asosiy muammo",
+"s01.prob1":"<strong>Kontekst cheklovi</strong> — Claude bir vaqtda ~200K token saqlaydi, katta loyihada yetmaydi",
+"s01.prob2":"<strong>Xotira yo'qligi</strong> — Har yangi sessiya \"bo'sh varaq\" dan boshlanadi, oldingi ish unutiladi",
+"s01.prob3":"<strong>Token isrofi</strong> — Noto'g'ri yondashuv bilan bir xil ishni qayta-qayta qilish kerak bo'ladi",
+"s01.info1t":"Namuna loyiha: EduPlatform",
+"s01.info1":"Bu qo'llanma davomida biz <strong>EduPlatform</strong> — onlayn ta'lim platformasi misolida ishlash usulini ko'rsatamiz. Loyihada foydalanuvchilar ro'yxatdan o'tadi, kurslarni ko'radi, darslarga yoziladi va progress ni kuzatadi.",
+"s01.h3":"Umumiy jarayon — 6 bosqich",
+"s01.ps1":"PRD.md yozish","s01.ps2":"Arxitektura loyihalash","s01.ps3":"AGENTS.md sozlash","s01.ps4":"Sessiyalarni rejalashtirish","s01.ps5":"Bosqichma-bosqich qurish","s01.ps6":"PROGRESS.md yangilash",
+"s02.title":"Rejalashtirish — PRD.md",
+"s02.p1":"PRD (Product Requirements Document) — bu loyihangizning \"pasporti\". Claude ga loyihangiz haqida batafsil ma'lumot beradi va har bir sessiyada kontekstni tiklashga yordam beradi.",
+"s02.h3a":"EduPlatform uchun PRD.md namunasi",
+"s02.callout1":"PRD yozishning 5 ta qoidasi",
+"s02.rule1":"Aniq texnologiyalar ro'yxatini yozing — Claude to'g'ri kod yozadi",
+"s02.rule2":"Modullarni alohida bo'limlarga ajrating — sessiyalarga bo'lish oson bo'ladi",
+"s02.rule3":"API endpoints ni batafsil yozing — backend ish aniq bo'ladi",
+"s02.rule4":"Ma'lumotlar bazasi sxemasini qo'shing — model tuzilmasi oldindan tayyor bo'ladi",
+"s02.rule5":"Cheklovlarni belgilang — Claude nima qilmasligi kerakligini ham yozing",
+"s03.title":"Arxitektura — Modulli Yondashuv","s03.h3a":"Monolit vs Modulli",
+"s03.bad_h4":"Monolit yondashuv","s03.bad1":"Bitta katta fayl, 2000+ qator","s03.bad2":"Claude kontekstga sig'maydi","s03.bad3":"Xatolikni topish qiyin","s03.bad4":"Qayta ishlatish imkonsiz",
+"s03.good_h4":"Modulli yondashuv","s03.good1":"Har fayl 200 qatordan kam","s03.good2":"Har sessiyada 1-2 modul","s03.good3":"Xatolik izolyatsiya qilingan","s03.good4":"Qayta ishlatish oson",
+"s03.h3b":"Papka tuzilmasi","s03.callout1":"200 qator qoidasi",
+"s03.callout1p":"Har bir fayl 200 qatordan oshmasligi kerak. Bu Claude ning kontekstini tejaydi va har bir sessiyada aniq bir modulga fokuslanish imkonini beradi. Agar fayl 200 qatordan oshsa — uni yana maydaroq modullarga bo'ling.",
+"s04.title":"AGENTS.md va CLAUDE.md",
+"s04.p1":"AGENTS.md va CLAUDE.md — Claude uchun \"ko'rsatma\" fayllar. Ular Claude ga loyihangizda qanday ishlash kerakligini tushuntiradi.",
+"s04.h3a":"Farqlar","s04.th1":"Xususiyat",
+"s04.r1c1":"Maqsad","s04.r1c2":"Umumiy loyiha qoidalari","s04.r1c3":"Har bir agent uchun alohida ko'rsatmalar",
+"s04.r2c1":"Joylashuvi","s04.r2c2":"Loyiha ildiz papkasida","s04.r2c3":"docs/ papkasida yoki ildizda",
+"s04.r3c1":"Tarkibi","s04.r3c2":"Kod uslubi, til, taqiqlar","s04.r3c3":"Rol, imkoniyatlar, cheklovlar",
+"s04.r4c1":"Qachon o'qiladi","s04.r4c2":"Har sessiya boshida avtomatik","s04.r4c3":"Kontekst sifatida berilganda",
+"s04.h3b":"AGENTS.md namunasi","s04.callout1":"AGENTS.md yozish sirlari",
+"s04.tip1":"Aniq rol bering — \"Sen tajribali backend dasturchi\" kabi",
+"s04.tip2":"Taqiqlarni yozing — nima qilmasligi kerak",
+"s04.tip3":"Fayl tuzilmasi ko'rsating — qayerga qanday fayl yaratish kerak",
+"s04.tip4":"Kod uslubini belgilang — naming convention, lint qoidalari",
+"s04.tip5":"Xotira mexanizmini ko'rsating — PROGRESS.md bilan ishlash tartibi",
+"s05.title":"Sessiya Strategiyasi",
+"s05.callout1":"Asosiy qoida: 1 sessiya = 1-2 modul",
+"s05.callout1p":"Har bir sessiyada faqat 1-2 ta modulni yarating yoki yangilang. Bu Claude ning kontekst oynasidan samarali foydalanishni ta'minlaydi va token isrofini kamaytiradi.",
+"s05.h3a":"10 sessiya rejasi — EduPlatform",
+"s05.tl1t":"Sessiya 1: Loyiha asosi","s05.tl1d":"package.json, tsconfig, database setup, shared utilities",
+"s05.tl2t":"Sessiya 2: Auth moduli","s05.tl2d":"Register, login, JWT, middleware",
+"s05.tl3t":"Sessiya 3: User profil","s05.tl3d":"Profil CRUD, avatar upload, settings",
+"s05.tl4t":"Sessiya 4: Kurslar CRUD","s05.tl4d":"Kurslarni yaratish, o'qish, yangilash, o'chirish",
+"s05.tl5t":"Sessiya 5: Darslar moduli","s05.tl5d":"Darslar CRUD, video integration",
+"s05.tl6t":"Sessiya 6: Progress tracking","s05.tl6d":"Foydalanuvchi progressi, statistika",
+"s05.tl7t":"Sessiya 7: Admin panel","s05.tl7d":"Boshqaruv paneli, dashboard",
+"s05.tl8t":"Sessiya 8: Frontend sahifalar","s05.tl8d":"Landing, kurslar ro'yxati, kurs sahifasi",
+"s05.tl9t":"Sessiya 9: UI polish","s05.tl9d":"Responsive dizayn, animatsiyalar, UX",
+"s05.tl10t":"Sessiya 10: Deploy","s05.tl10d":"CI/CD, deploy, monitoring, testing",
+"s05.h3b":"Sessiya boshlash prompti",
+"s05.info1t":"Token tejash hisob-kitobi",
+"s05.info1":"Oddiy yondashuv: ~50K token/sessiya (takroriy kontekst bilan). Modulli yondashuv: ~15-20K token/sessiya. Tejash: <strong>60-70%</strong> kam token sarflanadi!",
+"s06.title":"PROGRESS.md — Xotira Tizimi",
+"s06.p1":"Claude har yangi sessiyada hamma narsani unutadi. PROGRESS.md — bu sessiyalar orasida ma'lumot saqlash usuli. Har sessiya oxirida yangilanadi, har sessiya boshida o'qiladi.",
+"s06.h3a":"PROGRESS.md namunasi","s06.h3b":"Xotira usullari taqqoslash",
+"s06.th1":"Usul","s06.th2":"Qulaylik","s06.th3":"Kamchilik","s06.th4":"Tavsiya",
+"s06.r1c2":"Oddiy, tushunarli","s06.r1c3":"Qo'lda yangilash kerak","s06.r1c4":"Kichik-o'rta loyihalar",
+"s06.r2c1":"Claude Memory (Beads)","s06.r2c2":"Avtomatik","s06.r2c3":"Cheklangan hajm","s06.r2c4":"Kichik loyihalar",
+"s06.r3c2":"Tezkor","s06.r3c3":"Batafsil emas","s06.r3c4":"Kundalik vazifalar",
+"s06.r4c2":"Tarixiy","s06.r4c3":"O'qish qiyin","s06.r4c4":"Qo'shimcha sifatida",
+"s06.callout1":"5 ta best practice",
+"s06.bp1":"Har sessiya oxirida PROGRESS.md ni yangilashni UNUTMANG",
+"s06.bp2":"Faqat kerakli ma'lumotni yozing — ortiqchasi token sarflaydi",
+"s06.bp3":"Muammolarni alohida bo'limda yozing — keyingi sessiyada hal qilish oson",
+"s06.bp4":"Foiz ko'rsating (30%, 50%) — umumiy holatni tushunish oson",
+"s06.bp5":"Fayl nomlari va yo'llarini aniq yozing — Claude tezroq topadi",
+"s07.title":"Amaliy Namuna — 3 Sessiya",
+"s07.ses1":"Sessiya #1: Loyiha asosi","s07.ses2":"Sessiya #2: Auth moduli","s07.ses3":"Sessiya #3: Kurslar CRUD",
+"s07.s1c1":"package.json yaratildi","s07.s1c2":"TypeScript konfiguratsiya tayyor","s07.s1c3":"Database connection ishlaydi","s07.s1c4":"Error handling middleware tayyor","s07.s1c5":"PROGRESS.md yangilandi",
+"s07.s2c1":"Register endpoint ishlaydi","s07.s2c2":"Login va JWT token ishlaydi","s07.s2c3":"Auth middleware tayyor","s07.s2c4":"Testlar yashil","s07.s2c5":"PROGRESS.md yangilandi",
+"s07.s3c1":"GET /api/courses ishlaydi","s07.s3c2":"POST /api/courses (faqat admin)","s07.s3c3":"PUT va DELETE endpointlari","s07.s3c4":"Pagination qo'shildi","s07.s3c5":"PROGRESS.md yangilandi",
+"s07.callout1":"Muhim eslatma",
+"s07.callout1p":"Har sessiyadan keyin PROGRESS.md ni yangilashni unutmang! Bu keyingi sessiyada kontekstni tiklash uchun zarur.",
+"s08.title":"Token Optimallashtirish","s08.h3a":"Token sarfi taqqoslash",
+"s08.th1":"Amal","s08.th2":"Oddiy usul","s08.th3":"Optimal usul","s08.th4":"Tejash",
+"s08.r1c1":"Kontekst berish","s08.r2c1":"Modul yaratish","s08.r3c1":"Xato tuzatish","s08.r4c1":"Refaktoring","s08.r5c1":"Test yozish","s08.r6c1":"Sessiya jami",
+"s08.h3b":"10 ta oltin qoida",
+"s08.st1t":"Aniq prompt yozing","s08.st1d":"Umumiy so'rov o'rniga aniq fayl nomlari va vazifalarni ko'rsating.",
+"s08.st2t":"AGENTS.md ishlating","s08.st2d":"Har sessiyada qoidalarni takrorlamasdan, faylga yozib qo'ying.",
+"s08.st3t":"1 sessiya = 1 modul","s08.st3d":"Kichik, fokusli sessiyalar samaraliroq ishlaydi.",
+"s08.st4t":"200 qator limiti","s08.st4d":"Fayllarni kichik saqlang — kontekst tejaldi.",
+"s08.st5t":"PROGRESS.md yuritish","s08.st5d":"Sessiyalar orasida xotira sifatida foydalaning.",
+"s08.st6t":"Takrorlashdan saqlaning","s08.st6d":"Bir xil narsani qayta so'ramaslik uchun natijalarni saqlang.",
+"s08.st7t":"Batch operatsiyalar","s08.st7d":"Bir nechta kichik so'rov o'rniga bitta batafsil so'rov yuboring.",
+"s08.st8t":"Ortiqcha kodni bermang","s08.st8d":"Faqat kerakli fayllarni kontekstga qo'shing.",
+"s08.st9t":"Namuna bering","s08.st9d":"Ko'p tushuntirish o'rniga bitta namuna bering — Claude tezroq tushunadi.",
+"s08.st10t":"Sessiyani to'g'ri tugatish","s08.st10d":"Har sessiya oxirida xotirani yangilang va natijani tekshiring.",
+"s09.title":"Tez-tez Uchraydigan Xatolar",
+"s09.e1n":"1. Kontekstni haddan tashqari to'ldirish","s09.e1p":"Butun loyiha kodini bir sessiyaga joylashtirish — 200K token cheklovi tufayli Claude ishlamay qoladi.","s09.e1s":"<strong>Yechim:</strong> Faqat joriy modul fayllarini bering. AGENTS.md va PROGRESS.md kontekst uchun yetarli.",
+"s09.e2n":"2. PROGRESS.md yangilamaslik","s09.e2p":"Keyingi sessiyada Claude hamma narsani unutadi va qaytadan boshdan ishlaydi.","s09.e2s":"<strong>Yechim:</strong> Har sessiya oxirida PROGRESS.md yangilashni odat qiling. Prompt oxiriga eslatma qo'shing.",
+"s09.e3n":"3. Juda umumiy prompt berish","s09.e3p":"\"Menga web app yasa\" kabi umumiy so'rov — natija sifatsiz bo'ladi.","s09.e3s":"<strong>Yechim:</strong> Aniq fayl nomlari, endpoint lar va texnologiyalarni ko'rsating.",
+"s09.e4n":"4. Katta fayllar yaratish","s09.e4p":"500+ qatorli fayllar — Claude keyingi sessiyada to'liq o'qiy olmaydi.","s09.e4s":"<strong>Yechim:</strong> 200 qator limitiga rioya qiling. Katta fayllarni modullarga bo'ling.",
+"s09.e5n":"5. Sessiyada juda ko'p ish","s09.e5p":"Bir sessiyada 5+ modul yaratish — sifat pasayadi, xatolar ko'payadi.","s09.e5s":"<strong>Yechim:</strong> 1 sessiya = 1-2 modul. Sifat muhimroq tezlikdan.",
+"s09.e6n":"6. Testlarni keyinga qoldirish","s09.e6p":"Barcha modullar tayyor bo'lgandan keyin test yozish — xatolar ko'p bo'ladi.","s09.e6s":"<strong>Yechim:</strong> Har modul bilan birga testini ham yozing. Sessiya oxirida testlar yashil bo'lishi kerak.",
+"s10.title":"Xulosa","s10.h3a":"Loyiha hayot aylanmasi",
+"s10.lc1t":"Rejalashtirish","s10.lc1d":"PRD.md yozish, talablarni aniqlash",
+"s10.lc2t":"Arxitektura","s10.lc2d":"Papka tuzilmasi, modullar rejasi",
+"s10.lc3t":"Sozlash","s10.lc3d":"AGENTS.md, PROGRESS.md yaratish",
+"s10.lc4t":"Qurish","s10.lc4d":"Sessiyama-sessiya modullarni yaratish",
+"s10.lc5t":"Testlash","s10.lc5d":"Har modul uchun testlar yozish",
+"s10.lc6t":"Deploy","s10.lc6d":"CI/CD, monitoring, ishga tushirish",
+"s10.h3b":"Loyiha hajmiga qarab tavsiyalar",
+"s10.th1":"Loyiha hajmi","s10.th2":"Sessiyalar soni",
+"s10.r1c1":"Kichik (1-3 kun)","s10.r1c3":"Oddiy","s10.r1c4":"Ixtiyoriy",
+"s10.r2c1":"O'rta (1-2 hafta)","s10.r2c3":"Batafsil","s10.r2c4":"Zarur",
+"s10.r3c1":"Katta (1+ oy)","s10.r3c3":"Juda batafsil","s10.r3c4":"Majburiy",
+"s10.r4c3":"Avtomatlashtirilgan","s10.r4c4":"Bir nechta agent",
+"s10.cta_h3":"Katta loyihalar — kichik qadamlar bilan quriladi",
+"s10.cta_p":"Har bir sessiya — bitta qadam. Har bir modul — bitta g'isht. Sabrli va rejali ishlang, natija ajoyib bo'ladi.",
+"pdf.title":"PDF Yuklab Olish","pdf.desc":"PDF uchun rejimni tanlang:","pdf.light":"Yorug'","pdf.dark":"Qorong'u","pdf.cancel":"Bekor qilish","pdf.download":"Yuklab olish",
+"footer.text":"2026 Claude AI Qo'llanma. Barcha huquqlar himoyalangan."
+},
+en:{
+"header.logo":"Claude AI Guide",
+"mobileToc.title":"Table of Contents",
+"nav.01":"Introduction","nav.02":"PRD.md — Planning","nav.03":"Architecture","nav.04":"AGENTS.md / CLAUDE.md","nav.05":"Session strategy","nav.06":"PROGRESS.md","nav.07":"Practical example","nav.08":"Token optimization","nav.09":"Common errors","nav.10":"Conclusion",
+"hero.badge":"Guide 2026","hero.h1":"Building Large Projects<br>with Claude AI","hero.subtitle":"Token saving, session management and modular architecture — learn through a practical project example",
+"hero.m1":"minutes / session","hero.m2":"token context","hero.m3":"memory between sessions",
+"s01.title":"Introduction — Why a Special Approach?",
+"s01.p1":"Claude AI is a powerful tool, but using it inefficiently on large projects wastes too many tokens and yields poor results. In this guide we learn a special approach: improving efficiency through session planning, modular architecture and memory management.",
+"s01.callout1":"3 main problems",
+"s01.prob1":"<strong>Context limit</strong> — Claude holds ~200K tokens at once, not enough for large projects",
+"s01.prob2":"<strong>No memory</strong> — Each new session starts from a \"blank page\", previous work is forgotten",
+"s01.prob3":"<strong>Token waste</strong> — Wrong approach leads to doing the same work over and over",
+"s01.info1t":"Example project: EduPlatform",
+"s01.info1":"Throughout this guide we demonstrate the workflow using <strong>EduPlatform</strong> — an online learning platform. Users register, browse courses, enroll in lessons and track their progress.",
+"s01.h3":"Overall process — 6 stages",
+"s01.ps1":"Write PRD.md","s01.ps2":"Design architecture","s01.ps3":"Configure AGENTS.md","s01.ps4":"Plan sessions","s01.ps5":"Build step by step","s01.ps6":"Update PROGRESS.md",
+"s02.title":"Planning — PRD.md",
+"s02.p1":"PRD (Product Requirements Document) is your project's \"passport\". It gives Claude detailed information about your project and helps restore context in every session.",
+"s02.h3a":"PRD.md example for EduPlatform",
+"s02.callout1":"5 rules for writing a PRD",
+"s02.rule1":"Write an explicit tech stack — Claude writes correct code",
+"s02.rule2":"Separate modules into sections — easier to split into sessions",
+"s02.rule3":"Describe API endpoints in detail — backend work is clear",
+"s02.rule4":"Add database schema — model structure is ready in advance",
+"s02.rule5":"Set constraints — also write what Claude should NOT do",
+"s03.title":"Architecture — Modular Approach","s03.h3a":"Monolith vs Modular",
+"s03.bad_h4":"Monolith approach","s03.bad1":"Single huge file, 2000+ lines","s03.bad2":"Doesn't fit Claude's context","s03.bad3":"Hard to find bugs","s03.bad4":"Impossible to reuse",
+"s03.good_h4":"Modular approach","s03.good1":"Each file under 200 lines","s03.good2":"1-2 modules per session","s03.good3":"Errors are isolated","s03.good4":"Easy to reuse",
+"s03.h3b":"Folder structure","s03.callout1":"200-line rule",
+"s03.callout1p":"Each file should not exceed 200 lines. This saves Claude's context and allows focusing on exactly one module per session. If a file exceeds 200 lines — split it into smaller modules.",
+"s04.title":"AGENTS.md and CLAUDE.md",
+"s04.p1":"AGENTS.md and CLAUDE.md are \"instruction\" files for Claude. They tell Claude how to work in your project.",
+"s04.h3a":"Differences","s04.th1":"Feature",
+"s04.r1c1":"Purpose","s04.r1c2":"General project rules","s04.r1c3":"Separate instructions per agent",
+"s04.r2c1":"Location","s04.r2c2":"Project root folder","s04.r2c3":"docs/ folder or root",
+"s04.r3c1":"Content","s04.r3c2":"Code style, language, prohibitions","s04.r3c3":"Role, capabilities, limitations",
+"s04.r4c1":"When read","s04.r4c2":"Automatically at session start","s04.r4c3":"When given as context",
+"s04.h3b":"AGENTS.md example","s04.callout1":"AGENTS.md writing tips",
+"s04.tip1":"Give a clear role — like \"You are an experienced backend developer\"",
+"s04.tip2":"Write prohibitions — what it should NOT do",
+"s04.tip3":"Show file structure — where to create which files",
+"s04.tip4":"Set code style — naming convention, lint rules",
+"s04.tip5":"Show memory mechanism — how to work with PROGRESS.md",
+"s05.title":"Session Strategy",
+"s05.callout1":"Main rule: 1 session = 1-2 modules",
+"s05.callout1p":"Create or update only 1-2 modules per session. This ensures efficient use of Claude's context window and reduces token waste.",
+"s05.h3a":"10-session plan — EduPlatform",
+"s05.tl1t":"Session 1: Project foundation","s05.tl1d":"package.json, tsconfig, database setup, shared utilities",
+"s05.tl2t":"Session 2: Auth module","s05.tl2d":"Register, login, JWT, middleware",
+"s05.tl3t":"Session 3: User profile","s05.tl3d":"Profile CRUD, avatar upload, settings",
+"s05.tl4t":"Session 4: Courses CRUD","s05.tl4d":"Create, read, update, delete courses",
+"s05.tl5t":"Session 5: Lessons module","s05.tl5d":"Lessons CRUD, video integration",
+"s05.tl6t":"Session 6: Progress tracking","s05.tl6d":"User progress, statistics",
+"s05.tl7t":"Session 7: Admin panel","s05.tl7d":"Management panel, dashboard",
+"s05.tl8t":"Session 8: Frontend pages","s05.tl8d":"Landing, course list, course page",
+"s05.tl9t":"Session 9: UI polish","s05.tl9d":"Responsive design, animations, UX",
+"s05.tl10t":"Session 10: Deploy","s05.tl10d":"CI/CD, deploy, monitoring, testing",
+"s05.h3b":"Session start prompt",
+"s05.info1t":"Token saving calculation",
+"s05.info1":"Regular approach: ~50K tokens/session (with repeated context). Modular approach: ~15-20K tokens/session. Savings: <strong>60-70%</strong> fewer tokens!",
+"s06.title":"PROGRESS.md — Memory System",
+"s06.p1":"Claude forgets everything each new session. PROGRESS.md is a way to persist information between sessions. Updated at the end of each session, read at the start.",
+"s06.h3a":"PROGRESS.md example","s06.h3b":"Memory methods comparison",
+"s06.th1":"Method","s06.th2":"Advantage","s06.th3":"Disadvantage","s06.th4":"Recommendation",
+"s06.r1c2":"Simple, clear","s06.r1c3":"Manual update required","s06.r1c4":"Small-medium projects",
+"s06.r2c1":"Claude Memory (Beads)","s06.r2c2":"Automatic","s06.r2c3":"Limited capacity","s06.r2c4":"Small projects",
+"s06.r3c2":"Quick","s06.r3c3":"Not detailed","s06.r3c4":"Daily tasks",
+"s06.r4c2":"Historical","s06.r4c3":"Hard to read","s06.r4c4":"As a supplement",
+"s06.callout1":"5 best practices",
+"s06.bp1":"NEVER forget to update PROGRESS.md at end of each session",
+"s06.bp2":"Write only necessary info — extras waste tokens",
+"s06.bp3":"Write issues in a separate section — easier to solve next session",
+"s06.bp4":"Show percentages (30%, 50%) — easier to understand overall status",
+"s06.bp5":"Write exact file names and paths — Claude finds them faster",
+"s07.title":"Practical Example — 3 Sessions",
+"s07.ses1":"Session #1: Project foundation","s07.ses2":"Session #2: Auth module","s07.ses3":"Session #3: Courses CRUD",
+"s07.s1c1":"package.json created","s07.s1c2":"TypeScript configuration ready","s07.s1c3":"Database connection works","s07.s1c4":"Error handling middleware ready","s07.s1c5":"PROGRESS.md updated",
+"s07.s2c1":"Register endpoint works","s07.s2c2":"Login and JWT token works","s07.s2c3":"Auth middleware ready","s07.s2c4":"Tests passing","s07.s2c5":"PROGRESS.md updated",
+"s07.s3c1":"GET /api/courses works","s07.s3c2":"POST /api/courses (admin only)","s07.s3c3":"PUT and DELETE endpoints","s07.s3c4":"Pagination added","s07.s3c5":"PROGRESS.md updated",
+"s07.callout1":"Important note",
+"s07.callout1p":"Don't forget to update PROGRESS.md after each session! It's essential for restoring context in the next session.",
+"s08.title":"Token Optimization","s08.h3a":"Token usage comparison",
+"s08.th1":"Action","s08.th2":"Regular method","s08.th3":"Optimal method","s08.th4":"Savings",
+"s08.r1c1":"Providing context","s08.r2c1":"Creating module","s08.r3c1":"Fixing bugs","s08.r4c1":"Refactoring","s08.r5c1":"Writing tests","s08.r6c1":"Session total",
+"s08.h3b":"10 golden rules",
+"s08.st1t":"Write clear prompts","s08.st1d":"Specify exact file names and tasks instead of general requests.",
+"s08.st2t":"Use AGENTS.md","s08.st2d":"Write rules in a file instead of repeating every session.",
+"s08.st3t":"1 session = 1 module","s08.st3d":"Small, focused sessions work more efficiently.",
+"s08.st4t":"200-line limit","s08.st4d":"Keep files small — context is saved.",
+"s08.st5t":"Maintain PROGRESS.md","s08.st5d":"Use as memory between sessions.",
+"s08.st6t":"Avoid repetition","s08.st6d":"Save results to avoid re-requesting the same thing.",
+"s08.st7t":"Batch operations","s08.st7d":"Send one detailed request instead of several small ones.",
+"s08.st8t":"Don't provide excess code","s08.st8d":"Add only necessary files to context.",
+"s08.st9t":"Give examples","s08.st9d":"Give one example instead of lengthy explanations — Claude understands faster.",
+"s08.st10t":"End sessions properly","s08.st10d":"Update memory and verify results at the end of each session.",
+"s09.title":"Common Errors",
+"s09.e1n":"1. Overloading context","s09.e1p":"Stuffing the entire project code into one session — Claude breaks due to the 200K token limit.","s09.e1s":"<strong>Solution:</strong> Only provide current module files. AGENTS.md and PROGRESS.md are enough for context.",
+"s09.e2n":"2. Not updating PROGRESS.md","s09.e2p":"Claude forgets everything next session and starts from scratch.","s09.e2s":"<strong>Solution:</strong> Make it a habit to update PROGRESS.md at end of each session. Add a reminder to the prompt.",
+"s09.e3n":"3. Giving too general prompts","s09.e3p":"\"Make me a web app\" style general requests — result is low quality.","s09.e3s":"<strong>Solution:</strong> Specify exact file names, endpoints and technologies.",
+"s09.e4n":"4. Creating large files","s09.e4p":"500+ line files — Claude can't fully read them next session.","s09.e4s":"<strong>Solution:</strong> Follow the 200-line limit. Split large files into modules.",
+"s09.e5n":"5. Too much work per session","s09.e5p":"Creating 5+ modules in one session — quality drops, errors increase.","s09.e5s":"<strong>Solution:</strong> 1 session = 1-2 modules. Quality matters more than speed.",
+"s09.e6n":"6. Postponing tests","s09.e6p":"Writing tests after all modules are ready — too many bugs.","s09.e6s":"<strong>Solution:</strong> Write tests alongside each module. Tests should be green at session end.",
+"s10.title":"Conclusion","s10.h3a":"Project lifecycle",
+"s10.lc1t":"Planning","s10.lc1d":"Write PRD.md, define requirements",
+"s10.lc2t":"Architecture","s10.lc2d":"Folder structure, module plan",
+"s10.lc3t":"Setup","s10.lc3d":"Create AGENTS.md, PROGRESS.md",
+"s10.lc4t":"Building","s10.lc4d":"Create modules session by session",
+"s10.lc5t":"Testing","s10.lc5d":"Write tests for each module",
+"s10.lc6t":"Deploy","s10.lc6d":"CI/CD, monitoring, launch",
+"s10.h3b":"Recommendations by project size",
+"s10.th1":"Project size","s10.th2":"Number of sessions",
+"s10.r1c1":"Small (1-3 days)","s10.r1c3":"Simple","s10.r1c4":"Optional",
+"s10.r2c1":"Medium (1-2 weeks)","s10.r2c3":"Detailed","s10.r2c4":"Required",
+"s10.r3c1":"Large (1+ month)","s10.r3c3":"Very detailed","s10.r3c4":"Mandatory",
+"s10.r4c3":"Automated","s10.r4c4":"Multiple agents",
+"s10.cta_h3":"Large projects are built with small steps",
+"s10.cta_p":"Each session is a step. Each module is a brick. Work patiently and systematically, the result will be amazing.",
+"pdf.title":"Download PDF","pdf.desc":"Choose PDF theme:","pdf.light":"Light","pdf.dark":"Dark","pdf.cancel":"Cancel","pdf.download":"Download",
+"footer.text":"2026 Claude AI Guide. All rights reserved."
+},
+ru:{
+"header.logo":"Руководство Claude AI",
+"mobileToc.title":"Содержание",
+"nav.01":"Введение","nav.02":"PRD.md — Планирование","nav.03":"Архитектура","nav.04":"AGENTS.md / CLAUDE.md","nav.05":"Стратегия сессий","nav.06":"PROGRESS.md","nav.07":"Практический пример","nav.08":"Оптимизация токенов","nav.09":"Частые ошибки","nav.10":"Заключение",
+"hero.badge":"Руководство 2026","hero.h1":"Создание крупных проектов<br>с Claude AI","hero.subtitle":"Экономия токенов, управление сессиями и модульная архитектура — на примере реального проекта",
+"hero.m1":"минут / сессия","hero.m2":"токенов контекст","hero.m3":"памяти между сессиями",
+"s01.title":"Введение — Зачем нужен особый подход?",
+"s01.p1":"Claude AI — мощный инструмент, но неэффективное использование на больших проектах тратит слишком много токенов и даёт плохие результаты. В этом руководстве мы изучим особый подход: повышение эффективности через планирование сессий, модульную архитектуру и управление памятью.",
+"s01.callout1":"3 основные проблемы",
+"s01.prob1":"<strong>Ограничение контекста</strong> — Claude хранит ~200K токенов одновременно, для большого проекта недостаточно",
+"s01.prob2":"<strong>Отсутствие памяти</strong> — Каждая новая сессия начинается с \"чистого листа\", предыдущая работа забывается",
+"s01.prob3":"<strong>Расход токенов</strong> — Неправильный подход приводит к повторению одной и той же работы",
+"s01.info1t":"Пример проекта: EduPlatform",
+"s01.info1":"В этом руководстве мы покажем рабочий процесс на примере <strong>EduPlatform</strong> — онлайн-платформы обучения. Пользователи регистрируются, просматривают курсы, записываются на уроки и отслеживают прогресс.",
+"s01.h3":"Общий процесс — 6 этапов",
+"s01.ps1":"Написать PRD.md","s01.ps2":"Спроектировать архитектуру","s01.ps3":"Настроить AGENTS.md","s01.ps4":"Спланировать сессии","s01.ps5":"Строить поэтапно","s01.ps6":"Обновить PROGRESS.md",
+"s02.title":"Планирование — PRD.md",
+"s02.p1":"PRD (Product Requirements Document) — это \"паспорт\" вашего проекта. Даёт Claude подробную информацию о проекте и помогает восстановить контекст в каждой сессии.",
+"s02.h3a":"Пример PRD.md для EduPlatform",
+"s02.callout1":"5 правил написания PRD",
+"s02.rule1":"Укажите точный стек технологий — Claude напишет правильный код",
+"s02.rule2":"Разделите модули на разделы — будет легче делить на сессии",
+"s02.rule3":"Подробно опишите API endpoints — работа над бэкендом будет ясной",
+"s02.rule4":"Добавьте схему БД — структура моделей будет готова заранее",
+"s02.rule5":"Установите ограничения — укажите, что Claude НЕ должен делать",
+"s03.title":"Архитектура — Модульный подход","s03.h3a":"Монолит vs Модульный",
+"s03.bad_h4":"Монолитный подход","s03.bad1":"Один большой файл, 2000+ строк","s03.bad2":"Не помещается в контекст Claude","s03.bad3":"Трудно найти ошибки","s03.bad4":"Невозможно переиспользовать",
+"s03.good_h4":"Модульный подход","s03.good1":"Каждый файл до 200 строк","s03.good2":"1-2 модуля за сессию","s03.good3":"Ошибки изолированы","s03.good4":"Легко переиспользовать",
+"s03.h3b":"Структура папок","s03.callout1":"Правило 200 строк",
+"s03.callout1p":"Каждый файл не должен превышать 200 строк. Это экономит контекст Claude и позволяет фокусироваться на одном модуле за сессию. Если файл больше 200 строк — разбейте его на модули.",
+"s04.title":"AGENTS.md и CLAUDE.md",
+"s04.p1":"AGENTS.md и CLAUDE.md — файлы \"инструкций\" для Claude. Они объясняют Claude, как работать в вашем проекте.",
+"s04.h3a":"Различия","s04.th1":"Свойство",
+"s04.r1c1":"Назначение","s04.r1c2":"Общие правила проекта","s04.r1c3":"Отдельные инструкции для каждого агента",
+"s04.r2c1":"Расположение","s04.r2c2":"Корневая папка проекта","s04.r2c3":"Папка docs/ или корень",
+"s04.r3c1":"Содержание","s04.r3c2":"Стиль кода, язык, запреты","s04.r3c3":"Роль, возможности, ограничения",
+"s04.r4c1":"Когда читается","s04.r4c2":"Автоматически при старте сессии","s04.r4c3":"Когда передан как контекст",
+"s04.h3b":"Пример AGENTS.md","s04.callout1":"Советы по написанию AGENTS.md",
+"s04.tip1":"Дайте чёткую роль — \"Ты опытный backend-разработчик\"",
+"s04.tip2":"Напишите запреты — что НЕ должен делать",
+"s04.tip3":"Покажите структуру файлов — куда создавать какие файлы",
+"s04.tip4":"Задайте стиль кода — naming convention, правила линтера",
+"s04.tip5":"Укажите механизм памяти — порядок работы с PROGRESS.md",
+"s05.title":"Стратегия сессий",
+"s05.callout1":"Основное правило: 1 сессия = 1-2 модуля",
+"s05.callout1p":"Создавайте или обновляйте только 1-2 модуля за сессию. Это обеспечивает эффективное использование контекстного окна Claude и снижает расход токенов.",
+"s05.h3a":"План 10 сессий — EduPlatform",
+"s05.tl1t":"Сессия 1: Основа проекта","s05.tl1d":"package.json, tsconfig, настройка БД, общие утилиты",
+"s05.tl2t":"Сессия 2: Модуль Auth","s05.tl2d":"Регистрация, логин, JWT, middleware",
+"s05.tl3t":"Сессия 3: Профиль пользователя","s05.tl3d":"CRUD профиля, загрузка аватара, настройки",
+"s05.tl4t":"Сессия 4: CRUD курсов","s05.tl4d":"Создание, чтение, обновление, удаление курсов",
+"s05.tl5t":"Сессия 5: Модуль уроков","s05.tl5d":"CRUD уроков, интеграция видео",
+"s05.tl6t":"Сессия 6: Отслеживание прогресса","s05.tl6d":"Прогресс пользователя, статистика",
+"s05.tl7t":"Сессия 7: Панель админа","s05.tl7d":"Панель управления, дашборд",
+"s05.tl8t":"Сессия 8: Фронтенд-страницы","s05.tl8d":"Лендинг, список курсов, страница курса",
+"s05.tl9t":"Сессия 9: UI polish","s05.tl9d":"Адаптивный дизайн, анимации, UX",
+"s05.tl10t":"Сессия 10: Деплой","s05.tl10d":"CI/CD, деплой, мониторинг, тестирование",
+"s05.h3b":"Промпт начала сессии",
+"s05.info1t":"Расчёт экономии токенов",
+"s05.info1":"Обычный подход: ~50K токенов/сессия (с повторным контекстом). Модульный подход: ~15-20K токенов/сессия. Экономия: <strong>60-70%</strong> меньше токенов!",
+"s06.title":"PROGRESS.md — Система памяти",
+"s06.p1":"Claude забывает всё каждую новую сессию. PROGRESS.md — способ сохранять информацию между сессиями. Обновляется в конце каждой сессии, читается в начале.",
+"s06.h3a":"Пример PROGRESS.md","s06.h3b":"Сравнение методов памяти",
+"s06.th1":"Метод","s06.th2":"Преимущество","s06.th3":"Недостаток","s06.th4":"Рекомендация",
+"s06.r1c2":"Простой, понятный","s06.r1c3":"Требует ручного обновления","s06.r1c4":"Малые-средние проекты",
+"s06.r2c1":"Claude Memory (Beads)","s06.r2c2":"Автоматический","s06.r2c3":"Ограниченный объём","s06.r2c4":"Малые проекты",
+"s06.r3c2":"Быстрый","s06.r3c3":"Не детальный","s06.r3c4":"Ежедневные задачи",
+"s06.r4c2":"Исторический","s06.r4c3":"Трудно читать","s06.r4c4":"Как дополнение",
+"s06.callout1":"5 лучших практик",
+"s06.bp1":"НИКОГДА не забывайте обновлять PROGRESS.md в конце сессии",
+"s06.bp2":"Пишите только нужную информацию — лишнее расходует токены",
+"s06.bp3":"Описывайте проблемы в отдельном разделе — легче решить в следующей сессии",
+"s06.bp4":"Указывайте проценты (30%, 50%) — легче понять общий статус",
+"s06.bp5":"Пишите точные имена и пути файлов — Claude быстрее находит",
+"s07.title":"Практический пример — 3 сессии",
+"s07.ses1":"Сессия #1: Основа проекта","s07.ses2":"Сессия #2: Модуль Auth","s07.ses3":"Сессия #3: CRUD курсов",
+"s07.s1c1":"package.json создан","s07.s1c2":"Конфигурация TypeScript готова","s07.s1c3":"Подключение к БД работает","s07.s1c4":"Middleware обработки ошибок готов","s07.s1c5":"PROGRESS.md обновлён",
+"s07.s2c1":"Endpoint регистрации работает","s07.s2c2":"Логин и JWT-токен работают","s07.s2c3":"Auth middleware готов","s07.s2c4":"Тесты проходят","s07.s2c5":"PROGRESS.md обновлён",
+"s07.s3c1":"GET /api/courses работает","s07.s3c2":"POST /api/courses (только admin)","s07.s3c3":"PUT и DELETE endpoints","s07.s3c4":"Пагинация добавлена","s07.s3c5":"PROGRESS.md обновлён",
+"s07.callout1":"Важное замечание",
+"s07.callout1p":"Не забывайте обновлять PROGRESS.md после каждой сессии! Это необходимо для восстановления контекста в следующей сессии.",
+"s08.title":"Оптимизация токенов","s08.h3a":"Сравнение расхода токенов",
+"s08.th1":"Действие","s08.th2":"Обычный метод","s08.th3":"Оптимальный метод","s08.th4":"Экономия",
+"s08.r1c1":"Предоставление контекста","s08.r2c1":"Создание модуля","s08.r3c1":"Исправление ошибок","s08.r4c1":"Рефакторинг","s08.r5c1":"Написание тестов","s08.r6c1":"Итого за сессию",
+"s08.h3b":"10 золотых правил",
+"s08.st1t":"Пишите чёткие промпты","s08.st1d":"Указывайте точные имена файлов и задачи вместо общих запросов.",
+"s08.st2t":"Используйте AGENTS.md","s08.st2d":"Запишите правила в файл, не повторяйте каждую сессию.",
+"s08.st3t":"1 сессия = 1 модуль","s08.st3d":"Маленькие, фокусированные сессии работают эффективнее.",
+"s08.st4t":"Лимит 200 строк","s08.st4d":"Держите файлы маленькими — контекст экономится.",
+"s08.st5t":"Ведите PROGRESS.md","s08.st5d":"Используйте как память между сессиями.",
+"s08.st6t":"Избегайте повторений","s08.st6d":"Сохраняйте результаты, чтобы не запрашивать одно и то же.",
+"s08.st7t":"Пакетные операции","s08.st7d":"Отправляйте один подробный запрос вместо нескольких мелких.",
+"s08.st8t":"Не давайте лишний код","s08.st8d":"Добавляйте в контекст только нужные файлы.",
+"s08.st9t":"Давайте примеры","s08.st9d":"Один пример вместо длинных объяснений — Claude поймёт быстрее.",
+"s08.st10t":"Правильно завершайте сессию","s08.st10d":"Обновляйте память и проверяйте результат в конце каждой сессии.",
+"s09.title":"Частые ошибки",
+"s09.e1n":"1. Перегрузка контекста","s09.e1p":"Загрузка всего кода проекта в одну сессию — Claude ломается из-за лимита в 200K токенов.","s09.e1s":"<strong>Решение:</strong> Давайте только файлы текущего модуля. AGENTS.md и PROGRESS.md достаточно для контекста.",
+"s09.e2n":"2. Не обновлять PROGRESS.md","s09.e2p":"В следующей сессии Claude всё забудет и начнёт сначала.","s09.e2s":"<strong>Решение:</strong> Привыкните обновлять PROGRESS.md в конце каждой сессии. Добавьте напоминание в промпт.",
+"s09.e3n":"3. Слишком общие промпты","s09.e3p":"Запросы типа \"Сделай мне веб-приложение\" — результат некачественный.","s09.e3s":"<strong>Решение:</strong> Указывайте точные имена файлов, endpoints и технологии.",
+"s09.e4n":"4. Создание больших файлов","s09.e4p":"Файлы 500+ строк — Claude не сможет полностью прочитать в следующей сессии.","s09.e4s":"<strong>Решение:</strong> Соблюдайте лимит 200 строк. Разбивайте большие файлы на модули.",
+"s09.e5n":"5. Слишком много работы за сессию","s09.e5p":"Создание 5+ модулей за одну сессию — качество падает, ошибок больше.","s09.e5s":"<strong>Решение:</strong> 1 сессия = 1-2 модуля. Качество важнее скорости.",
+"s09.e6n":"6. Откладывание тестов","s09.e6p":"Написание тестов после готовности всех модулей — слишком много багов.","s09.e6s":"<strong>Решение:</strong> Пишите тесты вместе с каждым модулем. Тесты должны быть зелёными в конце сессии.",
+"s10.title":"Заключение","s10.h3a":"Жизненный цикл проекта",
+"s10.lc1t":"Планирование","s10.lc1d":"Написать PRD.md, определить требования",
+"s10.lc2t":"Архитектура","s10.lc2d":"Структура папок, план модулей",
+"s10.lc3t":"Настройка","s10.lc3d":"Создать AGENTS.md, PROGRESS.md",
+"s10.lc4t":"Разработка","s10.lc4d":"Создавать модули сессия за сессией",
+"s10.lc5t":"Тестирование","s10.lc5d":"Писать тесты для каждого модуля",
+"s10.lc6t":"Деплой","s10.lc6d":"CI/CD, мониторинг, запуск",
+"s10.h3b":"Рекомендации по размеру проекта",
+"s10.th1":"Размер проекта","s10.th2":"Количество сессий",
+"s10.r1c1":"Малый (1-3 дня)","s10.r1c3":"Простой","s10.r1c4":"По желанию",
+"s10.r2c1":"Средний (1-2 недели)","s10.r2c3":"Подробный","s10.r2c4":"Необходим",
+"s10.r3c1":"Большой (1+ месяц)","s10.r3c3":"Очень подробный","s10.r3c4":"Обязательный",
+"s10.r4c3":"Автоматизированный","s10.r4c4":"Несколько агентов",
+"s10.cta_h3":"Большие проекты строятся маленькими шагами",
+"s10.cta_p":"Каждая сессия — один шаг. Каждый модуль — один кирпич. Работайте терпеливо и планомерно, результат будет потрясающим.",
+"pdf.title":"Скачать PDF","pdf.desc":"Выберите тему PDF:","pdf.light":"Светлая","pdf.dark":"Тёмная","pdf.cancel":"Отмена","pdf.download":"Скачать",
+"footer.text":"2026 Руководство Claude AI. Все права защищены."
+}
+};
+// ===== I18N ENGINE =====
+function setLanguage(lang){
+  if(!I18N[lang])lang='uz';
+  var d=I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(d[k]!=null)el.textContent=d[k]});
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){var k=el.getAttribute('data-i18n-html');if(d[k]!=null)el.innerHTML=d[k]});
+  document.querySelectorAll('[data-i18n-aria]').forEach(function(el){var k=el.getAttribute('data-i18n-aria');if(d[k]!=null)el.setAttribute('aria-label',d[k])});
+  document.documentElement.setAttribute('lang',lang);
+  localStorage.setItem('lang',lang);
+  // update mobile TOC
+  var mNav=document.getElementById('mobileNav');
+  if(mNav){
+    mNav.innerHTML='';
+    document.querySelectorAll('.sidebar-nav a').forEach(function(item){
+      var li=document.createElement('li'),a=document.createElement('a');
+      a.href=item.getAttribute('href');a.textContent=item.textContent.trim();
+      a.addEventListener('click',function(){document.getElementById('mobileModal').classList.remove('show')});
+      li.appendChild(a);mNav.appendChild(li);
+    });
+  }
+  // update lang switcher UI
+  var lbl=document.getElementById('langLabel');
+  if(lbl)lbl.textContent=lang.toUpperCase();
+  document.querySelectorAll('.lang-option').forEach(function(o){o.classList.toggle('active',o.getAttribute('data-lang')===lang)});
+}
+// ===== LANG SWITCHER =====
+(function(){
+  var btn=document.getElementById('langBtn'),dd=document.getElementById('langDropdown');
+  if(!btn||!dd)return;
+  btn.addEventListener('click',function(e){e.stopPropagation();dd.classList.toggle('open')});
+  dd.addEventListener('click',function(e){
+    var t=e.target.closest('.lang-option');if(!t)return;
+    setLanguage(t.getAttribute('data-lang'));dd.classList.remove('open');
+  });
+  document.addEventListener('click',function(){dd.classList.remove('open')});
+})();
+// ===== INIT LANG =====
+(function(){
+  var lang=localStorage.getItem('lang')||'uz';
+  setLanguage(lang);
+  document.documentElement.setAttribute('data-lang-ready','');
+})();
 // ===== THEME =====
 (function(){
   var h=document.documentElement,t=document.getElementById('themeToggle');
@@ -2089,13 +2534,7 @@ function copyCode(btn){
 // ===== MOBILE TOC =====
 (function(){
   var btn=document.getElementById('mobileTocBtn'),modal=document.getElementById('mobileModal');
-  var close=document.getElementById('mobileClose'),nav=document.getElementById('mobileNav');
-  document.querySelectorAll('.sidebar-nav a').forEach(function(item){
-    var li=document.createElement('li'),a=document.createElement('a');
-    a.href=item.getAttribute('href');a.textContent=item.textContent.trim();
-    a.addEventListener('click',function(){modal.classList.remove('show')});
-    li.appendChild(a);nav.appendChild(li);
-  });
+  var close=document.getElementById('mobileClose');
   btn.addEventListener('click',function(){modal.classList.add('show')});
   close.addEventListener('click',function(){modal.classList.remove('show')});
   modal.addEventListener('click',function(e){if(e.target===modal)modal.classList.remove('show')});
