@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Claude AI bilan katta loyihalarni kam token sarflab qurish bo'yicha to'liq o'quv qo'llanma. AGENTS.md, sessiya strategiyasi, modulli arxitektura.">
+<meta name="author" content="Developer">
+<meta property="og:title" content="Claude AI bilan Katta Loyihalar Qurish Qo'llanmasi">
+<meta property="og:description" content="Token tejash, sessiya boshqaruvi, modulli arxitektura — amaliy loyiha misolida">
+<meta property="og:type" content="website">
+<title>Claude AI bilan Katta Loyihalar Qurish Qo'llanmasi</title>
+<style>
+:root {
+  --apple-black: #1D1D1F;
+  --apple-gray: #86868B;
+  --apple-gray-light: #F5F5F7;
+  --apple-gray-line: #E5E5EA;
+  --apple-blue: #0071E3;
+  --apple-green: #34C759;
+  --apple-yellow: #FF9F0A;
+  --apple-red: #FF3B30;
+  --apple-purple: #AF52DE;
+  --apple-white: #FFFFFF;
+  --code-bg: #1D1D1F;
+  --code-text: #F5F5F7;
+}
+
+[data-theme="light"] {
+  --bg: #FFFFFF;
+  --bg-secondary: #F5F5F7;
+  --bg-tertiary: #E5E5EA;
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --border: rgba(0,0,0,0.08);
+  --code-bg: #1D1D1F;
+  --card-bg: #FFFFFF;
+  --card-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --header-bg: rgba(255,255,255,0.72);
+  --sidebar-bg: #FFFFFF;
+  --sidebar-hover: #F5F5F7;
+  --sidebar-active-bg: rgba(0,113,227,0.08);
+  --callout-bg: #F5F5F7;
+  --table-header-bg: #F5F5F7;
+  --table-border: #E5E5EA;
+  --comparison-good-bg: #F0FFF4;
+  --comparison-bad-bg: #FFF5F5;
+  --timeline-line: #E5E5EA;
+  --modal-overlay: rgba(0,0,0,0.4);
+}
+
+[data-theme="dark"] {
+  --bg: #000000;
+  --bg-secondary: #1C1C1E;
+  --bg-tertiary: #2C2C2E;
+  --text-primary: #F5F5F7;
+  --text-secondary: #98989D;
+  --border: rgba(255,255,255,0.08);
+  --code-bg: #000000;
+  --card-bg: #1C1C1E;
+  --card-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  --header-bg: rgba(0,0,0,0.72);
+  --sidebar-bg: #1C1C1E;
+  --sidebar-hover: #2C2C2E;
+  --sidebar-active-bg: rgba(0,113,227,0.15);
+  --callout-bg: #1C1C1E;
+  --table-header-bg: #2C2C2E;
+  --table-border: #3A3A3C;
+  --comparison-good-bg: rgba(52,199,89,0.1);
+  --comparison-bad-bg: rgba(255,59,48,0.1);
+  --timeline-line: #3A3A3C;
+  --modal-overlay: rgba(0,0,0,0.7);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg);
+  transition: background 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* ===== HEADER ===== */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: var(--header-bg);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s ease;
+}
+.header-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 24px; height: 48px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.site-logo {
+  font-size: 13px; font-weight: 600; color: var(--text-secondary);
+  letter-spacing: -0.01em; text-decoration: none;
+}
+.theme-toggle {
+  background: none; border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 14px;
+  cursor: pointer; font-size: 14px; color: var(--text-primary);
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.3s ease;
+}
+.theme-toggle:hover { border-color: var(--apple-blue); }
+.theme-toggle .icon-sun, .theme-toggle .icon-moon { width: 16px; height: 16px; display: inline-block; }
+[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+.progress-bar {
+  position: fixed; top: 48px; left: 0; height: 3px; z-index: 999;
+  background: linear-gradient(90deg, var(--apple-blue), #40A9FF);
+  width: 0%; transition: width 0.1s linear;
+}
+
+/* ===== LAYOUT ===== */
+.page-wrapper {
+  display: flex; max-width: 1200px; margin: 0 auto;
+  padding-top: 51px;
+}
+.sidebar {
+  width: 260px; position: sticky; top: 51px;
+  height: calc(100vh - 51px); overflow-y: auto;
+  padding: 24px 0; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--sidebar-bg);
+}
+.sidebar-nav { list-style: none; padding: 0 12px; }
+.sidebar-nav li { margin-bottom: 2px; }
+.sidebar-nav a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 8px;
+  font-size: 14px; color: var(--text-secondary);
+  text-decoration: none; transition: all 0.2s ease;
+  line-height: 1.4;
+}
+.sidebar-nav a:hover { background: var(--sidebar-hover); color: var(--text-primary); }
+.sidebar-nav a.active {
+  background: var(--sidebar-active-bg);
+  color: var(--apple-blue); font-weight: 600;
+}
+.sidebar-nav .nav-num {
+  font-size: 11px; font-weight: 700; color: var(--text-secondary);
+  min-width: 22px; text-align: right; opacity: 0.5;
+}
+.sidebar-nav a.active .nav-num { color: var(--apple-blue); opacity: 1; }
+
+.main-content {
+  flex: 1; min-width: 0;
+  max-width: 820px; margin: 0 auto;
+  padding: 0 40px 80px;
+}
+
+/* ===== HERO ===== */
+.hero {
+  padding: 80px 0 60px; text-align: center;
+}
+.hero h1 {
+  font-size: 52px; font-weight: 700; letter-spacing: -0.03em;
+  line-height: 1.1; margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--apple-blue) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero .subtitle {
+  font-size: 20px; color: var(--text-secondary);
+  max-width: 600px; margin: 0 auto 48px;
+  line-height: 1.5;
+}
+.metric-cards {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+}
+.metric-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px 32px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--card-shadow);
+  text-align: center; min-width: 160px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.metric-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+.metric-value {
+  font-size: 36px; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--apple-blue); margin-bottom: 4px;
+}
+.metric-card:nth-child(2) .metric-value { color: var(--apple-green); }
+.metric-card:nth-child(3) .metric-value { color: var(--apple-yellow); }
+.metric-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+/* ===== SECTIONS ===== */
+.content-section { padding: 80px 0; }
+.content-section + .content-section { border-top: 1px solid var(--border); }
+.section-header { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 40px; }
+.section-header h2 {
+  font-size: 32px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2;
+}
+.section-header .section-num {
+  font-size: 14px; font-weight: 700; color: var(--apple-blue);
+  background: var(--sidebar-active-bg); border-radius: 6px;
+  padding: 4px 10px; white-space: nowrap; margin-top: 6px;
+}
+.section-body p { margin-bottom: 20px; color: var(--text-primary); }
+.section-body h3 {
+  font-size: 22px; font-weight: 600; letter-spacing: -0.02em;
+  margin: 40px 0 16px;
+}
+
+/* ===== 3D ICONS ===== */
+.icon-3d {
+  width: 64px; height: 64px; border-radius: 18px;
+  position: relative; flex-shrink: 0;
+  transform: perspective(500px) rotateX(5deg) rotateY(-5deg);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08), inset 0 2px 4px rgba(255,255,255,0.3);
+  transition: transform 0.4s ease;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.icon-3d:hover { transform: perspective(500px) rotateX(0deg) rotateY(0deg) scale(1.08); }
+.icon-3d::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 45%; border-radius: 18px 18px 50% 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.4), transparent);
+  pointer-events: none;
+}
+/* Icon 01 - Rocket */
+.icon-rocket { background: linear-gradient(135deg, #0071E3, #40A9FF); }
+.icon-rocket::before {
+  content: ''; position: absolute; width: 20px; height: 28px;
+  background: #fff; border-radius: 50% 50% 4px 4px;
+  top: 14px; left: 22px;
+}
+/* Icon 02 - Clipboard */
+.icon-clipboard { background: linear-gradient(135deg, #34C759, #30D158); }
+.icon-clipboard::before {
+  content: ''; position: absolute; width: 26px; height: 32px;
+  border: 3px solid #fff; border-radius: 4px;
+  top: 14px; left: 19px;
+}
+/* Icon 03 - Cube */
+.icon-cube { background: linear-gradient(135deg, #AF52DE, #BF5AF2); }
+.icon-cube::before {
+  content: ''; position: absolute; width: 24px; height: 24px;
+  border: 3px solid #fff; top: 18px; left: 20px;
+  transform: perspective(200px) rotateX(15deg) rotateY(-15deg);
+}
+/* Icon 04 - Robot */
+.icon-robot { background: linear-gradient(135deg, #0071E3, #5AC8FA); }
+.icon-robot::before {
+  content: ''; position: absolute; width: 28px; height: 22px;
+  border: 3px solid #fff; border-radius: 8px;
+  top: 20px; left: 18px;
+}
+/* Icon 05 - Calendar */
+.icon-calendar { background: linear-gradient(135deg, #FF3B30, #FF6961); }
+.icon-calendar::before {
+  content: ''; position: absolute; width: 28px; height: 28px;
+  border: 3px solid #fff; border-radius: 6px;
+  top: 16px; left: 18px;
+  border-top: 8px solid #fff;
+}
+/* Icon 06 - Progress */
+.icon-progress { background: linear-gradient(135deg, #34C759, #248A3D); }
+.icon-progress::before {
+  content: ''; position: absolute; width: 32px; height: 8px;
+  background: rgba(255,255,255,0.3); border-radius: 4px;
+  top: 28px; left: 16px;
+}
+.icon-progress .bar-fill {
+  position: absolute; width: 20px; height: 8px;
+  background: #fff; border-radius: 4px;
+  top: 28px; left: 16px; z-index: 1;
+}
+/* Icon 07 - Laptop */
+.icon-laptop { background: linear-gradient(135deg, #1D1D1F, #48484A); }
+.icon-laptop::before {
+  content: ''; position: absolute; width: 28px; height: 18px;
+  border: 2px solid #fff; border-radius: 3px 3px 0 0;
+  top: 16px; left: 18px;
+}
+/* Icon 08 - Coin */
+.icon-coin { background: linear-gradient(135deg, #FF9F0A, #FFD60A); }
+.icon-coin::before {
+  content: ''; position: absolute; width: 28px; height: 28px;
+  border: 3px solid #fff; border-radius: 50%;
+  top: 18px; left: 18px;
+}
+/* Icon 09 - Warning */
+.icon-warning { background: linear-gradient(135deg, #FF3B30, #FF6961); }
+.icon-warning::before {
+  content: ''; position: absolute;
+  width: 0; height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-bottom: 28px solid #fff;
+  top: 14px; left: 16px;
+}
+/* Icon 10 - Trophy */
+.icon-trophy { background: linear-gradient(135deg, #FF9F0A, #FFD60A); }
+.icon-trophy::before {
+  content: ''; position: absolute; width: 20px; height: 20px;
+  border: 3px solid #fff; border-radius: 4px 4px 50% 50%;
+  top: 14px; left: 22px;
+}
+
+/* ===== CALLOUT BOXES ===== */
+.callout {
+  background: var(--callout-bg); border-radius: 12px;
+  padding: 20px 24px; margin: 24px 0;
+  border-left: 4px solid var(--apple-blue);
+}
+.callout.warning { border-left-color: var(--apple-yellow); }
+.callout.error { border-left-color: var(--apple-red); }
+.callout.success { border-left-color: var(--apple-green); }
+.callout-title { font-weight: 600; font-size: 15px; margin-bottom: 8px; }
+
+/* ===== CODE BLOCKS ===== */
+.code-block {
+  position: relative; margin: 24px 0; border-radius: 12px;
+  overflow: hidden; background: var(--code-bg);
+}
+.code-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px; background: rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.code-lang { font-size: 12px; color: #98989D; font-weight: 600; text-transform: uppercase; }
+.copy-btn {
+  background: rgba(255,255,255,0.1); border: none; border-radius: 6px;
+  padding: 4px 12px; font-size: 12px; color: #98989D;
+  cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(255,255,255,0.2); color: #F5F5F7; }
+.code-body {
+  padding: 16px; overflow-x: auto; counter-reset: line;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 14px; line-height: 1.7; color: var(--code-text);
+}
+.code-body .line { display: block; }
+.code-body .line::before {
+  counter-increment: line; content: counter(line);
+  display: inline-block; width: 32px; text-align: right;
+  margin-right: 16px; color: #48484A; font-size: 12px;
+  user-select: none;
+}
+.code-body .kw { color: #FF7AB2; }
+.code-body .str { color: #FF8170; }
+.code-body .cm { color: #6C7986; }
+.code-body .fn { color: #67B7A4; }
+.code-body .num { color: #D0BF69; }
+.code-body .prop { color: #ACF2E4; }
+
+/* ===== COMPARISON BOX ===== */
+.comparison {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0;
+}
+.comparison-col {
+  border-radius: 12px; padding: 24px;
+  transition: transform 0.3s ease;
+}
+.comparison-col:hover { transform: translateY(-4px); }
+.comparison-bad {
+  background: var(--comparison-bad-bg);
+  border: 1px solid rgba(255,59,48,0.2);
+}
+.comparison-good {
+  background: var(--comparison-good-bg);
+  border: 1px solid rgba(52,199,89,0.2);
+}
+.comparison-col h4 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.comparison-bad h4 { color: var(--apple-red); }
+.comparison-good h4 { color: var(--apple-green); }
+.comparison-col ul { list-style: none; }
+.comparison-col li { padding: 4px 0; font-size: 15px; }
+.comparison-bad li::before { content: '\00D7\00A0'; color: var(--apple-red); font-weight: 700; }
+.comparison-good li::before { content: '\2713\00A0'; color: var(--apple-green); font-weight: 700; }
+
+/* ===== TABLES ===== */
+.table-wrapper { overflow-x: auto; margin: 24px 0; border-radius: 12px; border: 1px solid var(--table-border); }
+.table-wrapper table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table-wrapper th {
+  background: var(--table-header-bg); font-weight: 600;
+  text-align: left; padding: 12px 16px; font-size: 13px;
+  text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-secondary);
+}
+.table-wrapper td { padding: 12px 16px; border-top: 1px solid var(--table-border); }
+
+/* ===== TIMELINE ===== */
+.timeline { position: relative; padding-left: 32px; margin: 32px 0; }
+.timeline::before {
+  content: ''; position: absolute; left: 11px; top: 0; bottom: 0;
+  width: 2px; background: var(--timeline-line);
+}
+.timeline-item { position: relative; padding-bottom: 32px; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+  position: absolute; left: -32px; top: 4px;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; z-index: 1;
+}
+.timeline-dot.done { background: var(--apple-green); }
+.timeline-dot.current { background: var(--apple-yellow); }
+.timeline-dot.pending { background: var(--apple-gray); }
+.timeline-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+.timeline-desc { font-size: 14px; color: var(--text-secondary); }
+
+/* ===== STEP CARDS ===== */
+.step-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+.step-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.step-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.step-num {
+  font-size: 28px; font-weight: 700; color: var(--apple-yellow);
+  margin-bottom: 8px; letter-spacing: -0.02em;
+}
+.step-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.step-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+/* ===== ACCORDION ===== */
+details {
+  margin: 16px 0; border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+details summary {
+  padding: 16px 20px; cursor: pointer; font-weight: 600;
+  font-size: 15px; background: var(--callout-bg);
+  list-style: none; display: flex; align-items: center; gap: 8px;
+  transition: background 0.2s ease;
+}
+details summary:hover { background: var(--bg-tertiary); }
+details summary::before { content: '\25B6'; font-size: 10px; transition: transform 0.3s ease; }
+details[open] summary::before { transform: rotate(90deg); }
+details summary::-webkit-details-marker { display: none; }
+details .details-content { padding: 20px; }
+
+/* ===== ERROR CARDS ===== */
+.error-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px; margin: 16px 0;
+  transition: transform 0.3s ease;
+}
+.error-card:hover { transform: translateY(-2px); }
+.error-name { color: var(--apple-red); font-weight: 600; font-size: 17px; margin-bottom: 8px; }
+.error-problem { margin-bottom: 12px; font-size: 15px; }
+.error-solution {
+  background: var(--comparison-good-bg); border-radius: 8px;
+  padding: 12px 16px; font-size: 14px;
+  border-left: 3px solid var(--apple-green);
+}
+
+/* ===== INFO BOX ===== */
+.info-box {
+  background: var(--sidebar-active-bg); border: 1px solid rgba(0,113,227,0.15);
+  border-radius: 12px; padding: 20px 24px; margin: 24px 0;
+}
+.info-box-title { font-weight: 600; color: var(--apple-blue); margin-bottom: 8px; }
+
+/* ===== FINAL CTA ===== */
+.cta-panel {
+  text-align: center; padding: 60px 40px; margin: 40px 0;
+  background: linear-gradient(135deg, rgba(0,113,227,0.08), rgba(52,199,89,0.08));
+  border-radius: 20px; border: 1px solid var(--border);
+}
+.cta-panel h3 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+.cta-panel p { font-size: 17px; color: var(--text-secondary); max-width: 500px; margin: 0 auto; }
+
+/* ===== SCROLL REVEAL ===== */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  will-change: transform, opacity;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ===== FOOTER ===== */
+.site-footer {
+  text-align: center; padding: 40px 24px;
+  font-size: 13px; color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+}
+
+/* ===== MOBILE TOC ===== */
+.mobile-toc-btn {
+  display: none; position: fixed; bottom: 24px; right: 24px;
+  background: var(--apple-blue); color: #fff; border: none;
+  border-radius: 50%; width: 56px; height: 56px;
+  font-size: 20px; cursor: pointer; z-index: 900;
+  box-shadow: 0 4px 16px rgba(0,113,227,0.3);
+  transition: transform 0.3s ease;
+}
+.mobile-toc-btn:hover { transform: scale(1.1); }
+.mobile-modal {
+  display: none; position: fixed; inset: 0; z-index: 950;
+  background: var(--modal-overlay);
+  align-items: flex-end; justify-content: center;
+}
+.mobile-modal.show { display: flex; }
+.mobile-modal-content {
+  background: var(--card-bg); border-radius: 20px 20px 0 0;
+  padding: 24px; width: 100%; max-width: 500px; max-height: 70vh;
+  overflow-y: auto;
+}
+.mobile-modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.mobile-modal-header h3 { font-size: 18px; font-weight: 600; }
+.mobile-close {
+  background: var(--bg-tertiary); border: none; border-radius: 50%;
+  width: 32px; height: 32px; font-size: 16px; cursor: pointer;
+  color: var(--text-primary);
+}
+.mobile-nav { list-style: none; }
+.mobile-nav a {
+  display: block; padding: 12px 16px; border-radius: 10px;
+  text-decoration: none; color: var(--text-primary);
+  font-size: 16px; transition: background 0.2s ease;
+}
+.mobile-nav a:hover { background: var(--sidebar-hover); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .sidebar { display: none; }
+  .mobile-toc-btn { display: flex; align-items: center; justify-content: center; }
+  .main-content { padding: 0 24px 80px; }
+}
+@media (max-width: 768px) {
+  .hero h1 { font-size: 36px; }
+  .hero .subtitle { font-size: 17px; }
+  .metric-cards { flex-direction: column; align-items: center; }
+  .metric-card { width: 100%; max-width: 300px; }
+  .comparison { grid-template-columns: 1fr; }
+  .step-cards { grid-template-columns: 1fr; }
+  .section-header h2 { font-size: 26px; }
+  .content-section { padding: 60px 0; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 28px; }
+  .header-inner { padding: 0 16px; }
+  .main-content { padding: 0 16px 80px; }
+}
+
+/* Numbered list styling */
+.numbered-list { counter-reset: item; list-style: none; padding: 0; }
+.numbered-list li {
+  counter-increment: item; padding: 8px 0 8px 36px;
+  position: relative; font-size: 15px;
+}
+.numbered-list li::before {
+  content: counter(item); position: absolute; left: 0; top: 8px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--apple-blue); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Process steps */
+.process-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0;
+}
+.process-step {
+  text-align: center; padding: 20px 12px;
+  background: var(--callout-bg); border-radius: 12px;
+  font-size: 14px; font-weight: 500;
+}
+.process-step-num {
+  font-size: 24px; font-weight: 700; color: var(--apple-blue);
+  margin-bottom: 4px;
+}
+@media (max-width: 768px) { .process-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Session card */
+.session-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px; margin: 20px 0;
+  transition: transform 0.3s ease;
+}
+.session-card:hover { transform: translateY(-2px); }
+.session-card h4 { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+
+/* Checklist */
+.checklist { list-style: none; padding: 0; }
+.checklist li { padding: 6px 0 6px 28px; position: relative; font-size: 15px; }
+.checklist li::before {
+  content: ''; position: absolute; left: 0; top: 10px;
+  width: 16px; height: 16px; border-radius: 4px;
+  border: 2px solid var(--apple-green);
+}
+
+/* Lifecycle cards */
+.lifecycle-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0;
+}
+.lifecycle-card {
+  background: var(--callout-bg); border-radius: 12px;
+  padding: 20px; text-align: center;
+}
+.lifecycle-num {
+  font-size: 28px; font-weight: 700; color: var(--apple-blue);
+  margin-bottom: 4px;
+}
+.lifecycle-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+.lifecycle-desc { font-size: 13px; color: var(--text-secondary); }
+@media (max-width: 768px) { .lifecycle-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <a href="#" class="site-logo">Claude AI Qo'llanma</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Mavzuni almashtirish">
+      <span class="icon-sun">&#9788;</span>
+      <span class="icon-moon">&#9790;</span>
+    </button>
+  </div>
+</header>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- MOBILE TOC BUTTON -->
+<button class="mobile-toc-btn" id="mobileTocBtn" aria-label="Mundarija">&#9776;</button>
+<div class="mobile-modal" id="mobileModal">
+  <div class="mobile-modal-content">
+    <div class="mobile-modal-header">
+      <h3>Mundarija</h3>
+      <button class="mobile-close" id="mobileClose" aria-label="Yopish">&#10005;</button>
+    </div>
+    <ul class="mobile-nav" id="mobileNav"></ul>
+  </div>
+</div>
+
+<!-- PAGE WRAPPER -->
+<div class="page-wrapper">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" role="navigation" aria-label="Bo'limlar navigatsiyasi">
+  <ul class="sidebar-nav" id="sidebarNav">
+    <li><a href="#section-01"><span class="nav-num">01</span> Kirish</a></li>
+    <li><a href="#section-02"><span class="nav-num">02</span> PRD.md — Rejalashtirish</a></li>
+    <li><a href="#section-03"><span class="nav-num">03</span> Arxitektura</a></li>
+    <li><a href="#section-04"><span class="nav-num">04</span> AGENTS.md / CLAUDE.md</a></li>
+    <li><a href="#section-05"><span class="nav-num">05</span> Sessiya strategiyasi</a></li>
+    <li><a href="#section-06"><span class="nav-num">06</span> PROGRESS.md</a></li>
+    <li><a href="#section-07"><span class="nav-num">07</span> Amaliy namuna</a></li>
+    <li><a href="#section-08"><span class="nav-num">08</span> Token optimallashtirish</a></li>
+    <li><a href="#section-09"><span class="nav-num">09</span> Xatolar</a></li>
+    <li><a href="#section-10"><span class="nav-num">10</span> Xulosa</a></li>
+  </ul>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+<!-- HERO -->
+<section class="hero" aria-label="Asosiy sarlavha">
+  <h1>Claude AI bilan Katta Loyihalarni Qurish</h1>
+  <p class="subtitle">Token tejash, sessiya boshqaruvi, modulli arxitektura — amaliy loyiha misolida o'rganamiz</p>
+  <div class="metric-cards">
+    <div class="metric-card reveal">
+      <div class="metric-value" data-target="10">0</div>
+      <div class="metric-label">daqiqa / sessiya</div>
+    </div>
+    <div class="metric-card reveal">
+      <div class="metric-value" data-target="200" data-suffix="K">0</div>
+      <div class="metric-label">token kontekst</div>
+    </div>
+    <div class="metric-card reveal">
+      <div class="metric-value" data-target="0">0</div>
+      <div class="metric-label">xotira sessiyalar orasida</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 01: KIRISH -->
+<section id="section-01" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-rocket" aria-hidden="true"></div>
+    <div>
+      <span class="section-num">01</span>
+      <h2>Kirish — Nima Uchun Maxsus Yondashuv Kerak?</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <p class="reveal">Claude AI — bu kuchli vosita, lekin katta loyihalarda uni samarasiz ishlatish juda ko'p token sarflaydi va natija past bo'ladi. Bu qo'llanmada biz maxsus yondashuvni o'rganamiz: har bir sessiyani rejalashtirish, modulli arxitektura va xotirani boshqarish orqali samaradorlikni oshirish.</p>
+
+    <div class="callout warning reveal">
+      <div class="callout-title">3 ta asosiy muammo</div>
+      <ul style="list-style:none;padding:0;">
+        <li style="padding:6px 0;"><strong>Kontekst cheklovi</strong> — Claude bir vaqtda ~200K token saqlaydi, katta loyihada yetmaydi</li>
+        <li style="padding:6px 0;"><strong>Xotira yo'qligi</strong> — Har yangi sessiya "bo'sh varaq" dan boshlanadi, oldingi ish unutiladi</li>
+        <li style="padding:6px 0;"><strong>Token isrofi</strong> — Noto'g'ri yondashuv bilan bir xil ishni qayta-qayta qilish kerak bo'ladi</li>
+      </ul>
+    </div>
+
+    <div class="info-box reveal">
+      <div class="info-box-title">Namuna loyiha: EduPlatform</div>
+      <p style="margin:0;font-size:15px;">Bu qo'llanma davomida biz <strong>EduPlatform</strong> — onlayn ta'lim platformasi misolida ishlash usulini ko'rsatamiz. Loyihada foydalanuvchilar ro'yxatdan o'tadi, kurslarni ko'radi, darslarga yoziladi va progress ni kuzatadi.</p>
+    </div>
+
+    <h3 class="reveal">Umumiy jarayon — 6 bosqich</h3>
+    <div class="process-grid reveal">
+      <div class="process-step"><div class="process-step-num">1</div>PRD.md yozish</div>
+      <div class="process-step"><div class="process-step-num">2</div>Arxitektura loyihalash</div>
+      <div class="process-step"><div class="process-step-num">3</div>AGENTS.md sozlash</div>
+      <div class="process-step"><div class="process-step-num">4</div>Sessiyalarni rejalashtirish</div>
+      <div class="process-step"><div class="process-step-num">5</div>Bosqichma-bosqich qurish</div>
+      <div class="process-step"><div class="process-step-num">6</div>PROGRESS.md yangilash</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 02: PRD.md -->
+<section id="section-02" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-clipboard" aria-hidden="true"></div>
+    <div>
+      <span class="section-num">02</span>
+      <h2>Rejalashtirish — PRD.md</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <p class="reveal">PRD (Product Requirements Document) — bu loyihangizning "pasporti". Claude ga loyihangiz haqida batafsil ma'lumot beradi va har bir sessiyada kontekstni tiklashga yordam beradi.</p>
+
+    <h3 class="reveal">EduPlatform uchun PRD.md namunasi</h3>
+    <div class="code-block reveal">
+      <div class="code-header">
+        <span class="code-lang">Markdown</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-body">
+<span class="line"><span class="cm"># EduPlatform — PRD</span></span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Loyiha haqida</span></span>
+<span class="line">Onlayn ta'lim platformasi. Foydalanuvchilar kurslarni</span>
+<span class="line">ko'radi, darslarga yoziladi, videolarni tomosha qiladi</span>
+<span class="line">va progressni kuzatadi.</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Texnologiyalar</span></span>
+<span class="line">- <span class="kw">Frontend:</span> Next.js 14, TypeScript, Tailwind CSS</span>
+<span class="line">- <span class="kw">Backend:</span> Node.js, Express, PostgreSQL</span>
+<span class="line">- <span class="kw">Auth:</span> NextAuth.js (Google, GitHub OAuth)</span>
+<span class="line">- <span class="kw">Deploy:</span> Vercel (frontend), Railway (backend)</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Asosiy modullar</span></span>
+<span class="line"><span class="num">1.</span> Auth — ro'yxatdan o'tish, kirish, profil</span>
+<span class="line"><span class="num">2.</span> Courses — kurslar CRUD, kategoriyalar</span>
+<span class="line"><span class="num">3.</span> Lessons — darslar, video, matn kontenti</span>
+<span class="line"><span class="num">4.</span> Progress — foydalanuvchi progressi</span>
+<span class="line"><span class="num">5.</span> Admin — boshqaruv paneli</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## API Endpoints</span></span>
+<span class="line"><span class="kw">POST</span> /api/auth/register</span>
+<span class="line"><span class="kw">POST</span> /api/auth/login</span>
+<span class="line"><span class="kw">GET</span>  /api/courses</span>
+<span class="line"><span class="kw">POST</span> /api/courses (admin)</span>
+<span class="line"><span class="kw">GET</span>  /api/courses/:id/lessons</span>
+<span class="line"><span class="kw">POST</span> /api/progress/update</span>
+      </div>
+    </div>
+
+    <div class="callout success reveal">
+      <div class="callout-title">PRD yozishning 5 ta qoidasi</div>
+      <ol class="numbered-list">
+        <li>Aniq texnologiyalar ro'yxatini yozing — Claude to'g'ri kod yozadi</li>
+        <li>Modullarni alohida bo'limlarga ajrating — sessiyalarga bo'lish oson bo'ladi</li>
+        <li>API endpoints ni batafsil yozing — backend ish aniq bo'ladi</li>
+        <li>Ma'lumotlar bazasi sxemasini qo'shing — model tuzilmasi oldindan tayyor bo'ladi</li>
+        <li>Cheklovlarni belgilang — Claude nima qilmasligi kerakligini ham yozing</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 03: ARXITEKTURA -->
+<section id="section-03" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-cube" aria-hidden="true"></div>
+    <div>
+      <span class="section-num">03</span>
+      <h2>Arxitektura — Modulli Yondashuv</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <h3 class="reveal">Monolit vs Modulli</h3>
+    <div class="comparison reveal">
+      <div class="comparison-col comparison-bad">
+        <h4>Monolit yondashuv</h4>
+        <ul>
+          <li>Bitta katta fayl, 2000+ qator</li>
+          <li>Claude kontekstga sig'maydi</li>
+          <li>Xatolikni topish qiyin</li>
+          <li>Qayta ishlatish imkonsiz</li>
+        </ul>
+      </div>
+      <div class="comparison-col comparison-good">
+        <h4>Modulli yondashuv</h4>
+        <ul>
+          <li>Har fayl 200 qatordan kam</li>
+          <li>Har sessiyada 1-2 modul</li>
+          <li>Xatolik izolyatsiya qilingan</li>
+          <li>Qayta ishlatish oson</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="reveal">Papka tuzilmasi</h3>
+    <div class="code-block reveal">
+      <div class="code-header">
+        <span class="code-lang">Tree</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-body">
+<span class="line"><span class="fn">eduplatform/</span></span>
+<span class="line">  <span class="fn">docs/</span></span>
+<span class="line">    <span class="str">PRD.md</span></span>
+<span class="line">    <span class="str">AGENTS.md</span></span>
+<span class="line">    <span class="str">PROGRESS.md</span></span>
+<span class="line">  <span class="fn">src/</span></span>
+<span class="line">    <span class="fn">modules/</span></span>
+<span class="line">      <span class="fn">auth/</span></span>
+<span class="line">        <span class="str">auth.controller.ts</span>    <span class="cm">~120 qator</span></span>
+<span class="line">        <span class="str">auth.service.ts</span>       <span class="cm">~100 qator</span></span>
+<span class="line">        <span class="str">auth.routes.ts</span>        <span class="cm">~40 qator</span></span>
+<span class="line">        <span class="str">auth.test.ts</span>          <span class="cm">~80 qator</span></span>
+<span class="line">      <span class="fn">courses/</span></span>
+<span class="line">        <span class="str">courses.controller.ts</span> <span class="cm">~150 qator</span></span>
+<span class="line">        <span class="str">courses.service.ts</span>    <span class="cm">~130 qator</span></span>
+<span class="line">        <span class="str">courses.routes.ts</span>     <span class="cm">~50 qator</span></span>
+<span class="line">      <span class="fn">lessons/</span></span>
+<span class="line">      <span class="fn">progress/</span></span>
+<span class="line">    <span class="fn">shared/</span></span>
+<span class="line">      <span class="str">database.ts</span></span>
+<span class="line">      <span class="str">middleware.ts</span></span>
+<span class="line">      <span class="str">types.ts</span></span>
+      </div>
+    </div>
+
+    <div class="callout reveal">
+      <div class="callout-title">200 qator qoidasi</div>
+      <p style="margin:0;font-size:15px;">Har bir fayl 200 qatordan oshmasligi kerak. Bu Claude ning kontekstini tejaydi va har bir sessiyada aniq bir modulga fokuslanish imkonini beradi. Agar fayl 200 qatordan oshsa — uni yana maydaroq modullarga bo'ling.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 04: AGENTS.md -->
+<section id="section-04" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-robot" aria-hidden="true"></div>
+    <div>
+      <span class="section-num">04</span>
+      <h2>AGENTS.md va CLAUDE.md</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <p class="reveal">AGENTS.md va CLAUDE.md — Claude uchun "ko'rsatma" fayllar. Ular Claude ga loyihangizda qanday ishlash kerakligini tushuntiradi.</p>
+
+    <h3 class="reveal">Farqlar</h3>
+    <div class="table-wrapper reveal">
+      <table>
+        <thead>
+          <tr><th>Xususiyat</th><th>CLAUDE.md</th><th>AGENTS.md</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Maqsad</td><td>Umumiy loyiha qoidalari</td><td>Har bir agent uchun alohida ko'rsatmalar</td></tr>
+          <tr><td>Joylashuvi</td><td>Loyiha ildiz papkasida</td><td>docs/ papkasida yoki ildizda</td></tr>
+          <tr><td>Tarkibi</td><td>Kod uslubi, til, taqiqlar</td><td>Rol, imkoniyatlar, cheklovlar</td></tr>
+          <tr><td>Qachon o'qiladi</td><td>Har sessiya boshida avtomatik</td><td>Kontekst sifatida berilganda</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="reveal">AGENTS.md namunasi</h3>
+    <div class="code-block reveal">
+      <div class="code-header">
+        <span class="code-lang">Markdown</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-body">
+<span class="line"><span class="cm"># EduPlatform — Agent Ko'rsatmalari</span></span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Rol</span></span>
+<span class="line">Sen tajribali full-stack dasturchisan.</span>
+<span class="line">EduPlatform loyihasida ishlaysan.</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Texnologiyalar</span></span>
+<span class="line">- Next.js 14, TypeScript, Tailwind CSS</span>
+<span class="line">- Node.js, Express, PostgreSQL</span>
+<span class="line">- Har doim TypeScript ishlatasan</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Qoidalar</span></span>
+<span class="line">- Har bir fayl <span class="num">200</span> qatordan oshmasin</span>
+<span class="line">- Har funksiya <span class="num">50</span> qatordan oshmasin</span>
+<span class="line">- <span class="kw">any</span> tipini HECH QACHON ishlatma</span>
+<span class="line">- Har modulda test yoz</span>
+<span class="line">- Kommentariyalarni o'zbek tilida yoz</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Fayl tuzilmasi</span></span>
+<span class="line">src/modules/[modul]/ ichida ishlaysan.</span>
+<span class="line">Har modul: controller, service, routes, test.</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Xotira</span></span>
+<span class="line">Sessiya boshida PROGRESS.md ni o'qi.</span>
+<span class="line">Sessiya oxirida PROGRESS.md ni yangilay.</span>
+      </div>
+    </div>
+
+    <div class="callout success reveal">
+      <div class="callout-title">AGENTS.md yozish sirlari</div>
+      <ol class="numbered-list">
+        <li>Aniq rol bering — "Sen tajribali backend dasturchi" kabi</li>
+        <li>Taqiqlarni yozing — nima qilmasligi kerak</li>
+        <li>Fayl tuzilmasi ko'rsating — qayerga qanday fayl yaratish kerak</li>
+        <li>Kod uslubini belgilang — naming convention, lint qoidalari</li>
+        <li>Xotira mexanizmini ko'rsating — PROGRESS.md bilan ishlash tartibi</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 05: SESSIYA STRATEGIYASI -->
+<section id="section-05" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-calendar" aria-hidden="true"></div>
+    <div>
+      <span class="section-num">05</span>
+      <h2>Sessiya Strategiyasi</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="callout reveal">
+      <div class="callout-title">Asosiy qoida: 1 sessiya = 1-2 modul</div>
+      <p style="margin:0;font-size:15px;">Har bir sessiyada faqat 1-2 ta modulni yarating yoki yangilang. Bu Claude ning kontekst oynasidan samarali foydalanishni ta'minlaydi va token isrofini kamaytiradi.</p>
+    </div>
+
+    <h3 class="reveal">10 sessiya rejasi — EduPlatform</h3>
+    <div class="timeline reveal">
+      <div class="timeline-item">
+        <div class="timeline-dot done">1</div>
+        <div class="timeline-title">Sessiya 1: Loyiha asosi</div>
+        <div class="timeline-desc">package.json, tsconfig, database setup, shared utilities</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot done">2</div>
+        <div class="timeline-title">Sessiya 2: Auth moduli</div>
+        <div class="timeline-desc">Register, login, JWT, middleware</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot done">3</div>
+        <div class="timeline-title">Sessiya 3: User profil</div>
+        <div class="timeline-desc">Profil CRUD, avatar upload, settings</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot current">4</div>
+        <div class="timeline-title">Sessiya 4: Kurslar CRUD</div>
+        <div class="timeline-desc">Kurslarni yaratish, o'qish, yangilash, o'chirish</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot pending">5</div>
+        <div class="timeline-title">Sessiya 5: Darslar moduli</div>
+        <div class="timeline-desc">Darslar CRUD, video integration</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot pending">6</div>
+        <div class="timeline-title">Sessiya 6: Progress tracking</div>
+        <div class="timeline-desc">Foydalanuvchi progressi, statistika</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot pending">7</div>
+        <div class="timeline-title">Sessiya 7: Admin panel</div>
+        <div class="timeline-desc">Boshqaruv paneli, dashboard</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot pending">8</div>
+        <div class="timeline-title">Sessiya 8: Frontend sahifalar</div>
+        <div class="timeline-desc">Landing, kurslar ro'yxati, kurs sahifasi</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot pending">9</div>
+        <div class="timeline-title">Sessiya 9: UI polish</div>
+        <div class="timeline-desc">Responsive dizayn, animatsiyalar, UX</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot pending">10</div>
+        <div class="timeline-title">Sessiya 10: Deploy</div>
+        <div class="timeline-desc">CI/CD, deploy, monitoring, testing</div>
+      </div>
+    </div>
+
+    <h3 class="reveal">Sessiya boshlash prompti</h3>
+    <details class="reveal">
+      <summary>Namuna prompt — Sessiya boshida</summary>
+      <div class="details-content">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Prompt</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-body">
+<span class="line">Salom! Biz EduPlatform loyihasida ishlaymiz.</span>
+<span class="line"></span>
+<span class="line">Avval PROGRESS.md ni o'qi va loyiha holatini</span>
+<span class="line">tushun. Keyin AGENTS.md dagi qoidalarga amal qil.</span>
+<span class="line"></span>
+<span class="line">Bugun <span class="kw">Auth moduli</span> ustida ishlaymiz:</span>
+<span class="line">- src/modules/auth/ papkasida</span>
+<span class="line">- Register endpoint (email, password, name)</span>
+<span class="line">- Login endpoint (JWT token qaytarsin)</span>
+<span class="line">- Auth middleware (tokenni tekshirish)</span>
+<span class="line">- Barcha fayllar TypeScript da bo'lsin</span>
+<span class="line">- Har fayl 200 qatordan oshmasin</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <h3 class="reveal">Sessiya tugatish prompti</h3>
+    <details class="reveal">
+      <summary>Namuna prompt — Sessiya oxirida</summary>
+      <div class="details-content">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Prompt</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-body">
+<span class="line">Sessiya tugadi. Iltimos quyidagilarni bajaring:</span>
+<span class="line"></span>
+<span class="line"><span class="num">1.</span> PROGRESS.md ni yangilang:</span>
+<span class="line">   - Bugun nima qilindi</span>
+<span class="line">   - Qaysi fayllar yaratildi/o'zgartirildi</span>
+<span class="line">   - Keyingi sessiya uchun nima qilish kerak</span>
+<span class="line"></span>
+<span class="line"><span class="num">2.</span> Yaratilgan fayllar ro'yxati</span>
+<span class="line"></span>
+<span class="line"><span class="num">3.</span> Hal qilinmagan muammolar bo'lsa yozing</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="info-box reveal">
+      <div class="info-box-title">Token tejash hisob-kitobi</div>
+      <p style="margin:0;font-size:15px;">Oddiy yondashuv: ~50K token/sessiya (takroriy kontekst bilan). Modulli yondashuv: ~15-20K token/sessiya. Tejash: <strong>60-70%</strong> kam token sarflanadi!</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 06: PROGRESS.md -->
+<section id="section-06" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-progress" aria-hidden="true">
+      <span class="bar-fill"></span>
+    </div>
+    <div>
+      <span class="section-num">06</span>
+      <h2>PROGRESS.md — Xotira Tizimi</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <p class="reveal">Claude har yangi sessiyada hamma narsani unutadi. PROGRESS.md — bu sessiyalar orasida ma'lumot saqlash usuli. Har sessiya oxirida yangilanadi, har sessiya boshida o'qiladi.</p>
+
+    <h3 class="reveal">PROGRESS.md namunasi</h3>
+    <div class="code-block reveal">
+      <div class="code-header">
+        <span class="code-lang">Markdown</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-body">
+<span class="line"><span class="cm"># EduPlatform — Progress</span></span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Umumiy holat: 30% tayyor</span></span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Tugallangan modullar</span></span>
+<span class="line"><span class="fn">[x]</span> Loyiha asosi (package.json, tsconfig, DB)</span>
+<span class="line"><span class="fn">[x]</span> Auth moduli (register, login, JWT)</span>
+<span class="line"><span class="fn">[x]</span> User profil (CRUD, avatar)</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Hozirgi modul: Kurslar CRUD</span></span>
+<span class="line"><span class="kw">Holat:</span> 50% — CRUD tayyor, testlar yozilmoqda</span>
+<span class="line"><span class="kw">Fayllar:</span></span>
+<span class="line">  - src/modules/courses/courses.controller.ts</span>
+<span class="line">  - src/modules/courses/courses.service.ts</span>
+<span class="line">  - src/modules/courses/courses.routes.ts</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Keyingi qadam</span></span>
+<span class="line">- Kurslar uchun testlar yozish</span>
+<span class="line">- Kategoriyalar qo'shish</span>
+<span class="line">- Pagination qo'shish</span>
+<span class="line"></span>
+<span class="line"><span class="cm">## Ma'lum muammolar</span></span>
+<span class="line">- PostgreSQL connection pooling sozlanmagan</span>
+<span class="line">- Upload uchun S3 konfiguratsiya kerak</span>
+      </div>
+    </div>
+
+    <h3 class="reveal">Xotira usullari taqqoslash</h3>
+    <div class="table-wrapper reveal">
+      <table>
+        <thead>
+          <tr><th>Usul</th><th>Qulaylik</th><th>Kamchilik</th><th>Tavsiya</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>PROGRESS.md</td><td>Oddiy, tushunarli</td><td>Qo'lda yangilash kerak</td><td>Kichik-o'rta loyihalar</td></tr>
+          <tr><td>Claude Memory (Beads)</td><td>Avtomatik</td><td>Cheklangan hajm</td><td>Kichik loyihalar</td></tr>
+          <tr><td>Tasks / TODO</td><td>Tezkor</td><td>Batafsil emas</td><td>Kundalik vazifalar</td></tr>
+          <tr><td>Git commits</td><td>Tarixiy</td><td>O'qish qiyin</td><td>Qo'shimcha sifatida</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout success reveal">
+      <div class="callout-title">5 ta best practice</div>
+      <ol class="numbered-list">
+        <li>Har sessiya oxirida PROGRESS.md ni yangilashni UNUTMANG</li>
+        <li>Faqat kerakli ma'lumotni yozing — ortiqchasi token sarflaydi</li>
+        <li>Muammolarni alohida bo'limda yozing — keyingi sessiyada hal qilish oson</li>
+        <li>Foiz ko'rsating (30%, 50%) — umumiy holatni tushunish oson</li>
+        <li>Fayl nomlari va yo'llarini aniq yozing — Claude tezroq topadi</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 07: AMALIY NAMUNA -->
+<section id="section-07" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-laptop" aria-hidden="true"></div>
+    <div>
+      <span class="section-num">07</span>
+      <h2>Amaliy Namuna — 3 Sessiya</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="session-card reveal">
+      <h4>Sessiya #1: Loyiha asosi</h4>
+      <details>
+        <summary>Boshlash prompti</summary>
+        <div class="details-content">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Prompt</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body">
+<span class="line">Yangi loyiha boshlaymiz: EduPlatform.</span>
+<span class="line">AGENTS.md dagi qoidalarga amal qil.</span>
+<span class="line"></span>
+<span class="line">Bugun loyiha asosini yaratamiz:</span>
+<span class="line"><span class="num">1.</span> package.json (dependencies)</span>
+<span class="line"><span class="num">2.</span> tsconfig.json</span>
+<span class="line"><span class="num">3.</span> src/shared/database.ts (PostgreSQL)</span>
+<span class="line"><span class="num">4.</span> src/shared/middleware.ts (error handler)</span>
+<span class="line"><span class="num">5.</span> src/shared/types.ts (umumiy tiplar)</span>
+<span class="line"><span class="num">6.</span> src/app.ts (Express setup)</span>
+            </div>
+          </div>
+        </div>
+      </details>
+      <ul class="checklist" style="margin-top:16px;">
+        <li>package.json yaratildi</li>
+        <li>TypeScript konfiguratsiya tayyor</li>
+        <li>Database connection ishlaydi</li>
+        <li>Error handling middleware tayyor</li>
+        <li>PROGRESS.md yangilandi</li>
+      </ul>
+    </div>
+
+    <div class="session-card reveal">
+      <h4>Sessiya #2: Auth moduli</h4>
+      <details>
+        <summary>Boshlash prompti</summary>
+        <div class="details-content">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Prompt</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body">
+<span class="line">PROGRESS.md ni o'qi. Auth modulini yaratamiz.</span>
+<span class="line"></span>
+<span class="line">src/modules/auth/ ichida:</span>
+<span class="line">- auth.controller.ts (register, login)</span>
+<span class="line">- auth.service.ts (bcrypt, JWT)</span>
+<span class="line">- auth.routes.ts</span>
+<span class="line">- auth.test.ts</span>
+            </div>
+          </div>
+        </div>
+      </details>
+      <ul class="checklist" style="margin-top:16px;">
+        <li>Register endpoint ishlaydi</li>
+        <li>Login va JWT token ishlaydi</li>
+        <li>Auth middleware tayyor</li>
+        <li>Testlar yashil</li>
+        <li>PROGRESS.md yangilandi</li>
+      </ul>
+    </div>
+
+    <div class="session-card reveal">
+      <h4>Sessiya #3: Kurslar CRUD</h4>
+      <details>
+        <summary>Boshlash prompti</summary>
+        <div class="details-content">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Prompt</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body">
+<span class="line">PROGRESS.md ni o'qi. Kurslar modulini yaratamiz.</span>
+<span class="line"></span>
+<span class="line">src/modules/courses/ ichida:</span>
+<span class="line">- courses.controller.ts (CRUD)</span>
+<span class="line">- courses.service.ts</span>
+<span class="line">- courses.routes.ts</span>
+<span class="line">- Auth middleware bilan himoyalash</span>
+            </div>
+          </div>
+        </div>
+      </details>
+      <ul class="checklist" style="margin-top:16px;">
+        <li>GET /api/courses ishlaydi</li>
+        <li>POST /api/courses (faqat admin)</li>
+        <li>PUT va DELETE endpointlari</li>
+        <li>Pagination qo'shildi</li>
+        <li>PROGRESS.md yangilandi</li>
+      </ul>
+    </div>
+
+    <div class="callout warning reveal">
+      <div class="callout-title">Muhim eslatma</div>
+      <p style="margin:0;font-size:15px;">Har sessiyadan keyin PROGRESS.md ni yangilashni unutmang! Bu keyingi sessiyada kontekstni tiklash uchun zarur.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 08: TOKEN OPTIMALLASHTIRISH -->
+<section id="section-08" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-coin" aria-hidden="true"></div>
+    <div>
+      <span class="section-num">08</span>
+      <h2>Token Optimallashtirish</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <h3 class="reveal">Token sarfi taqqoslash</h3>
+    <div class="table-wrapper reveal">
+      <table>
+        <thead>
+          <tr><th>Amal</th><th>Oddiy usul</th><th>Optimal usul</th><th>Tejash</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Kontekst berish</td><td>~15K token</td><td>~3K token</td><td>80%</td></tr>
+          <tr><td>Modul yaratish</td><td>~20K token</td><td>~8K token</td><td>60%</td></tr>
+          <tr><td>Xato tuzatish</td><td>~10K token</td><td>~3K token</td><td>70%</td></tr>
+          <tr><td>Refaktoring</td><td>~25K token</td><td>~10K token</td><td>60%</td></tr>
+          <tr><td>Test yozish</td><td>~12K token</td><td>~5K token</td><td>58%</td></tr>
+          <tr><td>Sessiya jami</td><td>~50K token</td><td>~18K token</td><td>64%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="reveal">10 ta oltin qoida</h3>
+    <div class="step-cards">
+      <div class="step-card reveal">
+        <div class="step-num">01</div>
+        <div class="step-title">Aniq prompt yozing</div>
+        <div class="step-desc">Umumiy so'rov o'rniga aniq fayl nomlari va vazifalarni ko'rsating.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">02</div>
+        <div class="step-title">AGENTS.md ishlating</div>
+        <div class="step-desc">Har sessiyada qoidalarni takrorlamasdan, faylga yozib qo'ying.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">03</div>
+        <div class="step-title">1 sessiya = 1 modul</div>
+        <div class="step-desc">Kichik, fokusli sessiyalar samaraliroq ishlaydi.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">04</div>
+        <div class="step-title">200 qator limiti</div>
+        <div class="step-desc">Fayllarni kichik saqlang — kontekst tejaldi.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">05</div>
+        <div class="step-title">PROGRESS.md yuritish</div>
+        <div class="step-desc">Sessiyalar orasida xotira sifatida foydalaning.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">06</div>
+        <div class="step-title">Takrorlashdan saqlaning</div>
+        <div class="step-desc">Bir xil narsani qayta so'ramaslik uchun natijalarni saqlang.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">07</div>
+        <div class="step-title">Batch operatsiyalar</div>
+        <div class="step-desc">Bir nechta kichik so'rov o'rniga bitta batafsil so'rov yuboring.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">08</div>
+        <div class="step-title">Ortiqcha kodni bermang</div>
+        <div class="step-desc">Faqat kerakli fayllarni kontekstga qo'shing.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">09</div>
+        <div class="step-title">Namuna bering</div>
+        <div class="step-desc">Ko'p tushuntirish o'rniga bitta namuna bering — Claude tezroq tushunadi.</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">10</div>
+        <div class="step-title">Sessiyani to'g'ri tugatish</div>
+        <div class="step-desc">Har sessiya oxirida xotirani yangilang va natijani tekshiring.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 09: XATOLAR -->
+<section id="section-09" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-warning" aria-hidden="true"></div>
+    <div>
+      <span class="section-num">09</span>
+      <h2>Tez-tez Uchraydigan Xatolar</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="error-card reveal">
+      <div class="error-name">1. Kontekstni haddan tashqari to'ldirish</div>
+      <div class="error-problem">Butun loyiha kodini bir sessiyaga joylashtirish — 200K token cheklovi tufayli Claude ishlamay qoladi.</div>
+      <div class="error-solution"><strong>Yechim:</strong> Faqat joriy modul fayllarini bering. AGENTS.md va PROGRESS.md kontekst uchun yetarli.</div>
+    </div>
+    <div class="error-card reveal">
+      <div class="error-name">2. PROGRESS.md yangilamaslik</div>
+      <div class="error-problem">Keyingi sessiyada Claude hamma narsani unutadi va qaytadan boshdan ishlaydi.</div>
+      <div class="error-solution"><strong>Yechim:</strong> Har sessiya oxirida PROGRESS.md yangilashni odat qiling. Prompt oxiriga eslatma qo'shing.</div>
+    </div>
+    <div class="error-card reveal">
+      <div class="error-name">3. Juda umumiy prompt berish</div>
+      <div class="error-problem">"Menga web app yasa" kabi umumiy so'rov — natija sifatsiz bo'ladi.</div>
+      <div class="error-solution"><strong>Yechim:</strong> Aniq fayl nomlari, endpoint lar va texnologiyalarni ko'rsating.</div>
+    </div>
+    <div class="error-card reveal">
+      <div class="error-name">4. Katta fayllar yaratish</div>
+      <div class="error-problem">500+ qatorli fayllar — Claude keyingi sessiyada to'liq o'qiy olmaydi.</div>
+      <div class="error-solution"><strong>Yechim:</strong> 200 qator limitiga rioya qiling. Katta fayllarni modullarga bo'ling.</div>
+    </div>
+    <div class="error-card reveal">
+      <div class="error-name">5. Sessiyada juda ko'p ish</div>
+      <div class="error-problem">Bir sessiyada 5+ modul yaratish — sifat pasayadi, xatolar ko'payadi.</div>
+      <div class="error-solution"><strong>Yechim:</strong> 1 sessiya = 1-2 modul. Sifat muhimroq tezlikdan.</div>
+    </div>
+    <div class="error-card reveal">
+      <div class="error-name">6. Testlarni keyinga qoldirish</div>
+      <div class="error-problem">Barcha modullar tayyor bo'lgandan keyin test yozish — xatolar ko'p bo'ladi.</div>
+      <div class="error-solution"><strong>Yechim:</strong> Har modul bilan birga testini ham yozing. Sessiya oxirida testlar yashil bo'lishi kerak.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 10: XULOSA -->
+<section id="section-10" class="content-section">
+  <div class="section-header reveal">
+    <div class="icon-3d icon-trophy" aria-hidden="true"></div>
+    <div>
+      <span class="section-num">10</span>
+      <h2>Xulosa</h2>
+    </div>
+  </div>
+  <div class="section-body">
+    <h3 class="reveal">Loyiha hayot aylanmasi</h3>
+    <div class="lifecycle-grid reveal">
+      <div class="lifecycle-card">
+        <div class="lifecycle-num">1</div>
+        <div class="lifecycle-title">Rejalashtirish</div>
+        <div class="lifecycle-desc">PRD.md yozish, talablarni aniqlash</div>
+      </div>
+      <div class="lifecycle-card">
+        <div class="lifecycle-num">2</div>
+        <div class="lifecycle-title">Arxitektura</div>
+        <div class="lifecycle-desc">Papka tuzilmasi, modullar rejasi</div>
+      </div>
+      <div class="lifecycle-card">
+        <div class="lifecycle-num">3</div>
+        <div class="lifecycle-title">Sozlash</div>
+        <div class="lifecycle-desc">AGENTS.md, PROGRESS.md yaratish</div>
+      </div>
+      <div class="lifecycle-card">
+        <div class="lifecycle-num">4</div>
+        <div class="lifecycle-title">Qurish</div>
+        <div class="lifecycle-desc">Sessiyama-sessiya modullarni yaratish</div>
+      </div>
+      <div class="lifecycle-card">
+        <div class="lifecycle-num">5</div>
+        <div class="lifecycle-title">Testlash</div>
+        <div class="lifecycle-desc">Har modul uchun testlar yozish</div>
+      </div>
+      <div class="lifecycle-card">
+        <div class="lifecycle-num">6</div>
+        <div class="lifecycle-title">Deploy</div>
+        <div class="lifecycle-desc">CI/CD, monitoring, ishga tushirish</div>
+      </div>
+    </div>
+
+    <h3 class="reveal">Loyiha hajmiga qarab tavsiyalar</h3>
+    <div class="table-wrapper reveal">
+      <table>
+        <thead>
+          <tr><th>Loyiha hajmi</th><th>Sessiyalar soni</th><th>PROGRESS.md</th><th>AGENTS.md</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Kichik (1-3 kun)</td><td>2-4</td><td>Oddiy</td><td>Ixtiyoriy</td></tr>
+          <tr><td>O'rta (1-2 hafta)</td><td>5-10</td><td>Batafsil</td><td>Zarur</td></tr>
+          <tr><td>Katta (1+ oy)</td><td>15-30</td><td>Juda batafsil</td><td>Majburiy</td></tr>
+          <tr><td>Enterprise</td><td>50+</td><td>Avtomatlashtirilgan</td><td>Bir nechta agent</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cta-panel reveal">
+      <h3>Katta loyihalar — kichik qadamlar bilan quriladi</h3>
+      <p>Har bir sessiya — bitta qadam. Har bir modul — bitta g'isht. Sabrli va rejali ishlang, natija ajoyib bo'ladi.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer" role="contentinfo">
+  <p>2025 Claude AI Qo'llanma. Barcha huquqlar himoyalangan.</p>
+</footer>
+
+<script>
+// ===== THEME TOGGLE =====
+(function() {
+  const html = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    html.setAttribute('data-theme', saved);
+  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    html.setAttribute('data-theme', 'dark');
+  }
+  toggle.addEventListener('click', function() {
+    const current = html.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+})();
+
+// ===== SCROLL PROGRESS BAR =====
+(function() {
+  const bar = document.getElementById('progressBar');
+  window.addEventListener('scroll', function() {
+    const h = document.documentElement;
+    const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    bar.style.width = Math.min(pct, 100) + '%';
+  }, { passive: true });
+})();
+
+// ===== SCROLL SPY =====
+(function() {
+  const sections = document.querySelectorAll('.content-section');
+  const links = document.querySelectorAll('.sidebar-nav a');
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        links.forEach(function(link) {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(function(s) { observer.observe(s); });
+})();
+
+// ===== SCROLL REVEAL =====
+(function() {
+  var reveals = document.querySelectorAll('.reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry, i) {
+      if (entry.isIntersecting) {
+        setTimeout(function() {
+          entry.target.classList.add('visible');
+        }, i * 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(function(el) { observer.observe(el); });
+})();
+
+// ===== COUNTUP ANIMATION =====
+(function() {
+  var done = false;
+  var cards = document.querySelectorAll('.metric-value[data-target]');
+  var observer = new IntersectionObserver(function(entries) {
+    if (done) return;
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        done = true;
+        cards.forEach(function(card) {
+          var target = parseInt(card.getAttribute('data-target'));
+          var suffix = card.getAttribute('data-suffix') || '';
+          var prefix = card.getAttribute('data-prefix') || '';
+          var duration = 1500;
+          var start = performance.now();
+          function update(now) {
+            var elapsed = now - start;
+            var progress = Math.min(elapsed / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            card.textContent = prefix + Math.round(target * eased) + suffix;
+            if (progress < 1) requestAnimationFrame(update);
+          }
+          requestAnimationFrame(update);
+        });
+      }
+    });
+  }, { threshold: 0.5 });
+  cards.forEach(function(c) { observer.observe(c); });
+})();
+
+// ===== COPY CODE =====
+function copyCode(btn) {
+  var block = btn.closest('.code-block');
+  var lines = block.querySelectorAll('.line');
+  var text = Array.from(lines).map(function(l) { return l.textContent; }).join('\n');
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+// ===== MOBILE TOC =====
+(function() {
+  var btn = document.getElementById('mobileTocBtn');
+  var modal = document.getElementById('mobileModal');
+  var close = document.getElementById('mobileClose');
+  var nav = document.getElementById('mobileNav');
+  var items = document.querySelectorAll('.sidebar-nav a');
+  items.forEach(function(item) {
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = item.getAttribute('href');
+    a.textContent = item.textContent.trim();
+    a.addEventListener('click', function() { modal.classList.remove('show'); });
+    li.appendChild(a);
+    nav.appendChild(li);
+  });
+  btn.addEventListener('click', function() { modal.classList.add('show'); });
+  close.addEventListener('click', function() { modal.classList.remove('show'); });
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) modal.classList.remove('show');
+  });
+})();
+</script>
+
+</body>
+</html>
